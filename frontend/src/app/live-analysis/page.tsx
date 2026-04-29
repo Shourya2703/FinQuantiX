@@ -48,7 +48,12 @@ export default function LiveAnalysis() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="min-h-screen bg-[#020617] text-slate-100 font-sans selection:bg-indigo-500/30 overflow-x-hidden">
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none mix-blend-overlay fixed"></div>
+      <div className="fixed top-0 -left-1/4 w-[50%] h-[50%] bg-indigo-900 rounded-full mix-blend-screen filter blur-[120px] opacity-20 pointer-events-none"></div>
+      <div className="fixed bottom-0 -right-1/4 w-[50%] h-[50%] bg-purple-900 rounded-full mix-blend-screen filter blur-[120px] opacity-20 pointer-events-none"></div>
+      
+      <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white flex items-center">
@@ -143,6 +148,7 @@ export default function LiveAnalysis() {
           </div>
           <p className="text-xs text-slate-500 mt-4 text-center">Data simulated for demonstration purposes.</p>
         </div>
+      </div>
       </div>
     </div>
   );

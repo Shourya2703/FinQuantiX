@@ -70,10 +70,10 @@ function DashboardContent() {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
       });
       if (!response.ok) throw new Error('Failed to predict risk');
-      setResult(await response.json());
-      setWhatIfData(formData); // Copy to what-if on success
-      setWhatIfResult(await response.json());
-    } catch (err: any) { setError(err.message); } finally { setLoading(false); }
+      const data = await response.json();
+      setResult(data);
+      setWhatIfData(formData);
+      setWhatIfResult(data);    } catch (err: any) { setError(err.message); } finally { setLoading(false); }
   };
 
   // Handle What-If Live Updates
@@ -125,11 +125,11 @@ function DashboardContent() {
       <div className="grid grid-cols-2 gap-5">
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5">Age</label>
-          <input type="number" name="age" value={data.age} onChange={onChange} required min="18" max="100" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2 text-slate-200 outline-none focus:border-indigo-500" />
+          <input type="number" name="age" value={data.age} onChange={onChange} required min="18" max="100" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-purple-400/40 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300" />
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5">Employment</label>
-          <select name="employment_type" value={data.employment_type} onChange={onChange} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2 text-slate-200 outline-none focus:border-indigo-500">
+          <select name="employment_type" value={data.employment_type} onChange={onChange} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-purple-400/40 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300">
             <option value="Employed">Employed</option><option value="Self-Employed">Self-Employed</option><option value="Unemployed">Unemployed</option>
           </select>
         </div>
@@ -137,31 +137,31 @@ function DashboardContent() {
       <div className="grid grid-cols-2 gap-5">
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5 flex items-center"><DollarSign className="w-3 h-3 mr-1" /> Annual Income</label>
-          <input type="number" name="income" value={data.income} onChange={onChange} required min="0" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2 text-slate-200 outline-none focus:border-indigo-500" />
+          <input type="number" name="income" value={data.income} onChange={onChange} required min="0" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-purple-400/40 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300" />
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5">Credit Score</label>
-          <input type="number" name="credit_history" value={data.credit_history} onChange={onChange} required min="300" max="850" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2 text-slate-200 outline-none focus:border-indigo-500" />
+          <input type="number" name="credit_history" value={data.credit_history} onChange={onChange} required min="300" max="850" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-purple-400/40 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300" />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-5">
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5">Existing Loans</label>
-          <input type="number" name="existing_loans" value={data.existing_loans} onChange={onChange} required min="0" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2 text-slate-200 outline-none focus:border-indigo-500" />
+          <input type="number" name="existing_loans" value={data.existing_loans} onChange={onChange} required min="0" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-purple-400/40 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300" />
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5 flex items-center"><Percent className="w-3 h-3 mr-1" /> DTI Ratio</label>
-          <input type="number" name="debt_to_income_ratio" value={data.debt_to_income_ratio} onChange={onChange} required min="0" max="1" step="0.01" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2 text-slate-200 outline-none focus:border-indigo-500" />
+          <input type="number" name="debt_to_income_ratio" value={data.debt_to_income_ratio} onChange={onChange} required min="0" max="1" step="0.01" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-purple-400/40 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300" />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-5">
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5">Loan Amount</label>
-          <input type="number" name="loan_amount" value={data.loan_amount} onChange={onChange} required min="100" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2 text-slate-200 outline-none focus:border-indigo-500" />
+          <input type="number" name="loan_amount" value={data.loan_amount} onChange={onChange} required min="100" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-purple-400/40 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300" />
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5">Loan Term</label>
-          <select name="loan_term" value={data.loan_term} onChange={onChange} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2 text-slate-200 outline-none focus:border-indigo-500">
+          <select name="loan_term" value={data.loan_term} onChange={onChange} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-purple-400/40 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300">
             <option value="12">12 Months</option><option value="24">24 Months</option><option value="36">36 Months</option><option value="48">48 Months</option><option value="60">60 Months</option>
           </select>
         </div>
@@ -211,8 +211,8 @@ function DashboardContent() {
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100 font-sans selection:bg-indigo-500/30 overflow-x-hidden">
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none mix-blend-overlay fixed"></div>
-      <div className="fixed top-0 -left-1/4 w-[50%] h-[50%] bg-indigo-900 rounded-full mix-blend-screen filter blur-[120px] opacity-20 pointer-events-none"></div>
-      <div className="fixed bottom-0 -right-1/4 w-[50%] h-[50%] bg-purple-900 rounded-full mix-blend-screen filter blur-[120px] opacity-20 pointer-events-none"></div>
+      <div className="fixed top-0 -left-1/4 w-[50%] h-[50%] bg-indigo-900 rounded-full mix-blend-screen filter blur-[120px] opacity-10 pointer-events-none"></div>
+      <div className="fixed bottom-0 -right-1/4 w-[50%] h-[50%] bg-purple-900 rounded-full mix-blend-screen filter blur-[120px] opacity-10 pointer-events-none"></div>
 
       {/* Navigation handled by layout.tsx Navbar */}
       <main className="container mx-auto px-4 py-10 relative z-10 max-w-7xl">
@@ -220,13 +220,13 @@ function DashboardContent() {
         {/* PREDICTOR TAB */}
         {activeTab === 'new' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fade-in">
-            <div className="lg:col-span-5 bg-slate-900/40 backdrop-blur-md border border-slate-800/80 rounded-3xl p-8 shadow-xl">
-              <h2 className="text-xl font-semibold mb-6 flex items-center text-slate-200 border-b border-slate-800 pb-4">
-                <User className="w-5 h-5 mr-2 text-indigo-400" /> Applicant Profile
+            <div className="lg:col-span-5 bg-gradient-to-br from-[#0b0f1a] to-[#0f172a] backdrop-blur-md border border-purple-500/20 rounded-3xl p-8 shadow-[0_0_15px_rgba(168,85,247,0.15)] hover:border-purple-500/40 hover:shadow-[0_0_30px_rgba(168,85,247,0.25)] transition-all duration-500">
+              <h2 className="text-xl font-semibold mb-6 flex items-center text-slate-200 border-b border-white/5 pb-4">
+                <User className="w-5 h-5 mr-2 text-purple-400" /> Applicant Profile
               </h2>
               <form onSubmit={handleSubmit} className="space-y-5">
                 {renderFormFields(formData, handleChange)}
-                <button type="submit" disabled={loading} className="w-full mt-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium py-3.5 px-4 rounded-xl transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:shadow-[0_0_30px_rgba(99,102,241,0.5)] flex justify-center items-center">
+                <button type="submit" disabled={loading} className="w-full mt-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium py-3.5 px-4 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:shadow-xl hover:scale-[1.02] flex justify-center items-center">
                   {loading ? <span className="animate-pulse">Analyzing Risk...</span> : 'Run Risk Analysis'}
                 </button>
               </form>
@@ -235,9 +235,9 @@ function DashboardContent() {
             <div className="lg:col-span-7 flex flex-col gap-6">
               {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-xl">{error}</div>}
               {!result && !error && (
-                <div className="h-full min-h-[400px] border border-slate-800/50 border-dashed rounded-3xl flex flex-col items-center justify-center text-slate-500 bg-slate-900/20">
-                  <Activity className="w-12 h-12 mb-4 opacity-30" />
-                  <p>Fill out the profile to view AI analysis.</p>
+                <div className="h-full min-h-[400px] border border-purple-500/20 border-dashed rounded-3xl flex flex-col items-center justify-center text-slate-400 bg-slate-900/40 shadow-[0_0_15px_rgba(168,85,247,0.05)]">
+                  <Activity className="w-16 h-16 mb-5 opacity-40 text-purple-400" />
+                  <p className="text-xl font-semibold tracking-wide">Fill out the profile to view AI analysis.</p>
                 </div>
               )}
               {result && (
@@ -337,17 +337,17 @@ function DashboardContent() {
           <div className="animate-fade-in space-y-8">
             {metrics ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-center">
+                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-center hover:border-indigo-500/30 hover:shadow-[0_0_20px_rgba(99,102,241,0.15)] transition-all duration-300">
                   <div className="text-sm text-slate-400 font-medium mb-1">Model Accuracy</div>
                   <div className="text-4xl font-bold text-indigo-400">{(metrics.accuracy * 100).toFixed(1)}%</div>
                   <div className="text-xs text-slate-500 mt-2">Test set performance</div>
                 </div>
-                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-center">
+                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-center hover:border-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)] transition-all duration-300">
                   <div className="text-sm text-slate-400 font-medium mb-1">ROC AUC Score</div>
                   <div className="text-4xl font-bold text-purple-400">{metrics.roc_auc.toFixed(3)}</div>
                   <div className="text-xs text-slate-500 mt-2">Discriminative power</div>
                 </div>
-                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-center">
+                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-center hover:border-emerald-500/30 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] transition-all duration-300">
                   <div className="text-sm text-slate-400 font-medium mb-1">Predictions Today</div>
                   <div className="text-4xl font-bold text-emerald-400">{history.length}</div>
                   <div className="text-xs text-slate-500 mt-2">In-memory session tracking</div>
@@ -390,7 +390,7 @@ function DashboardContent() {
               )}
             </div>
 
-            <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl overflow-hidden">
+            <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl overflow-hidden hover:border-slate-700 transition-colors">
               <h3 className="text-sm font-semibold text-slate-300 mb-6">Recent Prediction History</h3>
               {history.length > 0 ? (
                 <div className="overflow-x-auto">

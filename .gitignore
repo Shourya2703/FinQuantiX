@@ -36,3 +36,12 @@ out/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Model artifacts
+backend/model.joblib
+backend/metrics.json
+backend/background.csv
+
+# Large data files
+backend/lending_club_data.csv
+backend/lending_club_sample.csv
