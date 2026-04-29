@@ -5,15 +5,12 @@ import { Shield, Activity, Zap, ChevronRight, BarChart3, Database, Globe, Lock, 
 export default function LandingPage() {
   return (
     <div className="bg-[#020617] text-slate-100 font-sans selection:bg-indigo-500/30">
-      {/* Background Cinematic Elements */}
       <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none mix-blend-overlay z-0"></div>
       
-      {/* Glowing Orbs - Fixed so they don't affect scroll */}
       <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/20 rounded-full mix-blend-screen filter blur-[150px] animate-pulse-slow pointer-events-none z-0"></div>
       <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 rounded-full mix-blend-screen filter blur-[150px] animate-pulse-slow animation-delay-2000 pointer-events-none z-0"></div>
       <div className="fixed top-[40%] left-[60%] w-[30%] h-[30%] bg-blue-600/10 rounded-full mix-blend-screen filter blur-[120px] animate-pulse-slow animation-delay-4000 pointer-events-none z-0"></div>
 
-      {/* Hero Section */}
       <section className="relative z-40 container mx-auto px-6 pt-32 pb-24 max-w-7xl">
         <div className="flex flex-col lg:flex-row items-center gap-16">
           <div className="flex-1 text-center lg:text-left">
@@ -80,12 +77,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Trust Section */}
       <section className="py-20 border-y border-white/5 bg-slate-950/30">
         <div className="container mx-auto px-6 max-w-7xl">
           <p className="text-center text-slate-500 text-sm font-medium uppercase tracking-[0.3em] mb-12">Trusted by global financial institutions</p>
           <div className="flex flex-wrap justify-center gap-12 md:gap-24 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
-             {/* Fake Logos using icons and text */}
              <div className="flex items-center gap-2">
                 <Globe className="w-6 h-6" /> <span className="text-xl font-bold font-mono tracking-tighter">GLOBAL BANK</span>
              </div>
@@ -102,7 +97,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features Section */}
       <section id="features" className="py-32 relative z-40 container mx-auto px-6 max-w-7xl">
         <div className="text-center mb-20">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">Engineered for Precision</h2>
@@ -128,7 +122,7 @@ export default function LandingPage() {
             </div>
             <h3 className="text-2xl font-bold text-slate-200 mb-4">Live Simulator</h3>
             <p className="text-slate-400 leading-relaxed">
-              Experience the power of real-time "What-If" analysis. Adjust any parameter and watch the risk surface adapt instantly with ultra-low latency.
+              Experience the power of real-time &quot;What-If&quot; analysis. Adjust any parameter and watch the risk surface adapt instantly with ultra-low latency.
             </p>
           </div>
           
@@ -137,7 +131,7 @@ export default function LandingPage() {
             <div className="w-14 h-14 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform group-hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]">
               <Shield className="w-7 h-7 text-blue-400" />
             </div>
-            <h3 className="text-2xl font-bold text-slate-200 mb-4">Secure & Scalable</h3>
+            <h3 className="text-2xl font-bold text-slate-200 mb-4">Secure &amp; Scalable</h3>
             <p className="text-slate-400 leading-relaxed">
               Enterprise-grade security meets high-performance ensemble learning. Track ROC curves and model performance in a unified command center.
             </p>

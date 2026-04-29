@@ -10,13 +10,12 @@ import { Activity, ShieldCheck, ShieldAlert, DollarSign, Briefcase, User, Percen
 function DashboardContent() {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(tabParam || 'new'); // 'new', 'whatif', 'dashboard'
+  const [activeTab, setActiveTab] = useState(tabParam || 'new');
 
   useEffect(() => {
     if (tabParam) setActiveTab(tabParam);
   }, [tabParam]);
 
-  // Predictor State
   const [formData, setFormData] = useState({
     age: '30',
     income: '65000',
@@ -31,17 +30,14 @@ function DashboardContent() {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // What-If State
   const [whatIfData, setWhatIfData] = useState({ ...formData });
   const [whatIfResult, setWhatIfResult] = useState<any>(null);
   const [whatIfLoading, setWhatIfLoading] = useState(false);
 
-  // Dashboard State
   const [metrics, setMetrics] = useState<any>(null);
   const [history, setHistory] = useState<any[]>([]);
   const [featureImportance, setFeatureImportance] = useState<any[]>([]);
 
-  // Fetch Dashboard Data
   useEffect(() => {
     if (activeTab === 'dashboard') {
       fetch('http://127.0.0.1:8000/metrics').then(res => res.json()).then(setMetrics);
@@ -50,7 +46,6 @@ function DashboardContent() {
     }
   }, [activeTab]);
 
-  // Handle Predictor
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -76,7 +71,6 @@ function DashboardContent() {
       setWhatIfResult(data);    } catch (err: any) { setError(err.message); } finally { setLoading(false); }
   };
 
-  // Handle What-If Live Updates
   const handleWhatIfChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const newData = { ...whatIfData, [e.target.name]: e.target.value };
     setWhatIfData(newData);
@@ -99,12 +93,11 @@ function DashboardContent() {
           });
           if (response.ok) setWhatIfResult(await response.json());
         } catch (e) { } finally { setWhatIfLoading(false); }
-      }, 500); // 500ms debounce
+      }, 500);
       return () => clearTimeout(timeoutId);
     }
   }, [whatIfData, activeTab]);
 
-  // Reusable components
   const ConfidenceIndicator = ({ confidence }: { confidence: number }) => (
     <div className="mt-4">
       <div className="flex justify-between text-xs text-slate-400 mb-1">

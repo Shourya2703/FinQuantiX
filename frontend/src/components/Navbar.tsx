@@ -11,7 +11,7 @@ function NavbarContent() {
   const searchParams = useSearchParams();
   const [isAuth, setIsAuth] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [authStep, setAuthStep] = useState(1); // 1 = Main, 2 = OTP, 3 = Google
+  const [authStep, setAuthStep] = useState(1);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
@@ -102,7 +102,6 @@ function NavbarContent() {
   };
 
   const NavLink = ({ href, label, activeTab }: { href: string, label: string, activeTab?: string }) => {
-    // Determine if active based on pathname or search params
     const isActive = pathname === href || (searchParams?.get('tab') === activeTab);
     
     return (

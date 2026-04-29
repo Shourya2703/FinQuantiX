@@ -6,18 +6,16 @@ import requests
 import random
 import os
 
-# Configuration - Real API key from resend.com
 RESEND_API_KEY = "re_HEsog1YF_EXEaA6AL8v7GnJ94wRodsm69" 
 
 app = FastAPI(title="Credit Risk Predictor API")
 
 prediction_history = []
-otp_store = {}  # {email: otp}
+otp_store = {}
 
-# Allow CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify frontend URL
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -46,7 +44,6 @@ class GoogleLoginRequest(BaseModel):
 
 @app.post("/predict")
 def predict_risk(application: LoanApplication):
-    # Map employment type to one-hot encoding
     emp_employed = 1 if application.employment_type == 'Employed' else 0
     emp_self_employed = 1 if application.employment_type == 'Self-Employed' else 0
     emp_unemployed = 1 if application.employment_type == 'Unemployed' else 0
@@ -71,7 +68,6 @@ def predict_risk(application: LoanApplication):
     try:
         result = model_instance.predict_and_explain(input_data)
         
-        # Save to history (keep last 50)
         prediction_history.insert(0, {"input": input_data, "result": result})
         if len(prediction_history) > 50:
             prediction_history.pop()
@@ -82,11 +78,6 @@ def predict_risk(application: LoanApplication):
 
 @app.post("/what-if")
 def what_if_predict(application: LoanApplication):
-    # Same as predict but explicitly named for what-if scenarios
-    # Note: What-if predictions are usually NOT saved to history, or saved separately.
-    # We will just run the model directly.
-    # We reuse the same logic as predict but don't save to history list.
-    
     emp_employed = 1 if application.employment_type == 'Employed' else 0
     emp_self_employed = 1 if application.employment_type == 'Self-Employed' else 0
     emp_unemployed = 1 if application.employment_type == 'Unemployed' else 0
@@ -126,7 +117,6 @@ def get_feature_importance():
     return {"global_feature_importance": model_instance.get_feature_importance()}
 
 def send_email_otp(email: str, otp: str):
-    """Sends OTP via Resend API"""
     if RESEND_API_KEY == "re_123456789":
         print(f"\n[WARNING] RESEND_API_KEY not configured. OTP for {email}: {otp}\n")
         return False
@@ -147,7 +137,7 @@ def send_email_otp(email: str, otp: str):
             </div>
             <p style="font-size: 14px; color: #94a3b8;">This code will expire in 10 minutes. If you did not request this code, please ignore this email.</p>
             <hr style="border: 0; border-top: 1px solid #1e293b; margin: 32px 0;">
-            <p style="font-size: 12px; color: #64748b; text-align: center;">&copy; 2026 FinQuantiX AI Systems. Confidential & Secure.</p>
+            <p style="font-size: 12px; color: #64748b; text-align: center;">&copy; 2026 FinQuantiX AI Systems. Confidential &amp; Secure.</p>
         </div>
         """
         
@@ -186,8 +176,6 @@ def verify_otp(req: OTPRequest):
 
 @app.post("/auth/google-login")
 def google_login(req: GoogleLoginRequest):
-    # In a real app, you would verify the email and password against Google's OAuth
-    # For this simulation, we log the user in directly as requested.
     return {"status": "success", "email": req.email, "message": "Google authentication successful."}
 
 @app.get("/")
@@ -196,5 +184,4 @@ def root_check():
 
 @app.get("/health")
 def health_check():
-    # Production-standard health check
     return {"status": "healthy"}

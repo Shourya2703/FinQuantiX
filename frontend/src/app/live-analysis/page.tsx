@@ -9,9 +9,7 @@ export default function LiveAnalysis() {
   const [currentDefaults, setCurrentDefaults] = useState(1243);
   const [riskTrend, setRiskTrend] = useState<number>(0);
 
-  // Simulate real-time streaming data
   useEffect(() => {
-    // Initial data
     const initialData = Array.from({ length: 20 }, (_, i) => ({
       time: new Date(Date.now() - (20 - i) * 3000).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit' }),
       defaultRate: 4.5 + Math.random() * 1.5,
@@ -21,20 +19,19 @@ export default function LiveAnalysis() {
 
     const interval = setInterval(() => {
       setData(prev => {
-        const newRate = 4.5 + Math.random() * 1.5 + (Math.sin(Date.now() / 10000) * 0.5); // Add some sinusoidal trend
+        const newRate = 4.5 + Math.random() * 1.5 + (Math.sin(Date.now() / 10000) * 0.5);
         const newData = [...prev.slice(1), {
           time: new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit' }),
           defaultRate: newRate,
           applications: 100 + Math.floor(Math.random() * 50)
         }];
         
-        // Update counters
         setRiskTrend(parseFloat((newRate - prev[prev.length - 1].defaultRate).toFixed(2)));
         if (Math.random() > 0.5) setCurrentDefaults(curr => curr + Math.floor(Math.random() * 3));
         
         return newData;
       });
-    }, 3000); // Every 3 seconds
+    }, 3000);
 
     return () => clearInterval(interval);
   }, []);

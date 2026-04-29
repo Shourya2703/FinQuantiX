@@ -50,19 +50,16 @@ class CreditRiskModel:
         df['loan_income_ratio'] = df['loan_amount'] / (df['income'] + 1)
         df['risk_index'] = df['debt_to_income_ratio'] * (1000 - df['credit_history'])
         
-        # LOGICAL SCORING: 0 to 100 scale
-        # Balanced weights for a realistic demo
         score = (
             (df['debt_to_income_ratio'] * 35) + 
             (df['loan_income_ratio'] * 60) + 
             ((850 - df['credit_history']) / 8.0) +
             (df['existing_loans'] * 2.5) -
             (df['age'] / 15.0) +
-            (df['emp_unemployed'] * 45) +      # Significant but not absolute
-            (df['emp_self_employed'] * 12)     # Realistic adjustment
+            (df['emp_unemployed'] * 45) +
+            (df['emp_self_employed'] * 12)
         )
         
-        # Rejection for extreme leverage remains
         score += np.where(df['loan_income_ratio'] > 0.8, 150, 0)
         
         score = (score - score.mean()) / score.std()
@@ -94,7 +91,6 @@ class CreditRiskModel:
         y_prob = self.model.predict_proba(X_test_scaled)[:, 1]
         fpr, tpr, _ = roc_curve(y_test, y_prob)
         
-        # Sample points to keep the payload reasonable (e.g., 50 points)
         indices = np.linspace(0, len(fpr) - 1, 50).astype(int)
         roc_points = [{"fpr": float(fpr[i]), "tpr": float(tpr[i])} for i in indices]
         
@@ -169,7 +165,7 @@ class CreditRiskModel:
                     nl_explanations.append(f"{fname.capitalize()} {verb} risk by {impact:.1f}%.")
 
             risk_level = "Low" if prob < 0.3 else "Medium" if prob < 0.7 else "High"
-            confidence = abs(prob - 0.5) * 2 # How far from decision boundary
+            confidence = abs(prob - 0.5) * 2
             
             return {
                 "status": "success", "risk_probability": float(prob), "risk_level": risk_level,
