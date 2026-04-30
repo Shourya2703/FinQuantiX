@@ -38,9 +38,16 @@ class OTPRequest(BaseModel):
     email: str
     otp: str
 
-class GoogleLoginRequest(BaseModel):
+class UserSignupRequest(BaseModel):
+    first_name: str
+    last_name: str
     email: str
     password: str
+
+class UserLoginRequest(BaseModel):
+    email: str
+
+user_store = {} # Simulated DB: {email: {first_name, last_name, password}}
 
 @app.post("/predict")
 def predict_risk(application: LoanApplication):
@@ -154,6 +161,26 @@ def send_email_otp(email: str, otp: str):
         print(f"Error sending email: {e}")
         return False
 
+@app.post("/auth/signup")
+def signup(req: UserSignupRequest):
+    if req.email in user_store:
+        raise HTTPException(status_code=400, detail="User already exists")
+    
+    # Store user data temporarily (verified after OTP)
+    user_store[req.email] = {
+        "first_name": req.first_name,
+        "last_name": req.last_name,
+        "password": req.password,
+        "verified": False
+    }
+    return {"status": "success", "message": "User registered. Please verify OTP."}
+
+@app.post("/auth/login")
+def login(req: UserLoginRequest):
+    if req.email not in user_store:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"status": "success", "message": "Proceed to OTP verification."}
+
 @app.post("/auth/send-otp")
 def send_otp(req: EmailRequest):
     otp = "".join([str(random.randint(0, 9)) for _ in range(6)])
@@ -171,12 +198,17 @@ def verify_otp(req: OTPRequest):
     stored_otp = otp_store.get(req.email)
     if stored_otp and req.otp == stored_otp:
         del otp_store[req.email]
-        return {"status": "success", "token": "fake-jwt-token"}
+        
+        # Mark user as verified if they were in signup flow
+        if req.email in user_store:
+            user_store[req.email]["verified"] = True
+            
+        return {
+            "status": "success", 
+            "token": "fake-jwt-token",
+            "user": user_store.get(req.email, {"email": req.email})
+        }
     raise HTTPException(status_code=400, detail="Invalid or expired OTP")
-
-@app.post("/auth/google-login")
-def google_login(req: GoogleLoginRequest):
-    return {"status": "success", "email": req.email, "message": "Google authentication successful."}
 
 @app.get("/")
 def root_check():

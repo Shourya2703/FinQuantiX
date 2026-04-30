@@ -45,23 +45,23 @@ export default function LiveAnalysis() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-100 font-sans selection:bg-indigo-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[#03091A] text-slate-100 font-sans selection:bg-[#006AFF]/30 overflow-x-hidden">
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none mix-blend-overlay fixed"></div>
-      <div className="fixed top-0 -left-1/4 w-[50%] h-[50%] bg-indigo-900 rounded-full mix-blend-screen filter blur-[120px] opacity-20 pointer-events-none"></div>
-      <div className="fixed bottom-0 -right-1/4 w-[50%] h-[50%] bg-purple-900 rounded-full mix-blend-screen filter blur-[120px] opacity-20 pointer-events-none"></div>
+      <div className="fixed top-0 -left-1/4 w-[50%] h-[50%] bg-[#000E75] rounded-full mix-blend-screen filter blur-[120px] opacity-20 pointer-events-none"></div>
+      <div className="fixed bottom-0 -right-1/4 w-[50%] h-[50%] bg-[#000E75] rounded-full mix-blend-screen filter blur-[120px] opacity-20 pointer-events-none"></div>
       
       <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white flex items-center">
-            <Activity className="w-8 h-8 mr-3 text-emerald-400" /> 
+            <Activity className="w-8 h-8 mr-3 text-[#00F0FF]" /> 
             Global Live Analysis
           </h1>
           <p className="text-slate-400 mt-2">Real-time telemetry of global credit risk models.</p>
         </div>
-        <div className="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-full animate-pulse-slow">
-          <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-          <span className="text-sm font-medium text-emerald-400">System Online (Streaming)</span>
+        <div className="flex items-center space-x-2 bg-[#00E7FF]/10 border border-[#00E7FF]/20 px-4 py-2 rounded-full animate-pulse-slow">
+          <div className="w-2 h-2 rounded-full bg-[#00E7FF]"></div>
+          <span className="text-sm font-medium text-[#00F0FF]">System Online (Streaming)</span>
         </div>
       </div>
 
@@ -79,7 +79,7 @@ export default function LiveAnalysis() {
           <div className="text-5xl font-bold text-amber-400">
             {data.length > 0 ? data[data.length - 1].defaultRate.toFixed(2) : '0.00'}%
           </div>
-          <div className={`text-sm mt-2 flex items-center ${riskTrend > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+          <div className={`text-sm mt-2 flex items-center ${riskTrend > 0 ? 'text-rose-400' : 'text-[#00F0FF]'}`}>
             {riskTrend > 0 ? '↑' : '↓'} {Math.abs(riskTrend)}% from last tick
           </div>
         </div>
@@ -87,7 +87,7 @@ export default function LiveAnalysis() {
         <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-6 opacity-10"><TrendingUp className="w-16 h-16" /></div>
           <h3 className="text-sm font-semibold text-slate-400 mb-2">Throughput (Apps/sec)</h3>
-          <div className="text-5xl font-bold text-indigo-400">
+          <div className="text-5xl font-bold text-[#00A9FF]">
             {data.length > 0 ? (data[data.length - 1].applications / 3).toFixed(0) : '0'}
           </div>
           <div className="text-sm text-slate-500 mt-2">Global API inference requests</div>
@@ -97,7 +97,7 @@ export default function LiveAnalysis() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 bg-slate-900/60 border border-slate-800 rounded-3xl p-6">
           <h3 className="text-lg font-semibold text-white mb-6 flex items-center">
-            <Activity className="w-5 h-5 mr-2 text-indigo-400" /> Real-Time Default Rate Trend
+            <Activity className="w-5 h-5 mr-2 text-[#00A9FF]" /> Real-Time Default Rate Trend
           </h3>
           <div className="h-[350px] w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -123,7 +123,7 @@ export default function LiveAnalysis() {
 
         <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6">
           <h3 className="text-lg font-semibold text-white mb-6 flex items-center">
-            <Globe className="w-5 h-5 mr-2 text-blue-400" /> Regional Risk Heat
+            <Globe className="w-5 h-5 mr-2 text-[#00A9FF]" /> Regional Risk Heat
           </h3>
           <div className="h-[350px] w-full">
             <ResponsiveContainer width="100%" height="100%">

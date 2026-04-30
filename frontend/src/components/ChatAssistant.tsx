@@ -63,13 +63,13 @@ export default function ChatAssistant() {
       {/* Floating Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-2xl ${isOpen ? 'bg-rose-500 rotate-90 scale-90' : 'bg-indigo-600 hover:bg-indigo-500 hover:scale-110 shadow-indigo-500/20'}`}
+        className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-2xl ${isOpen ? 'bg-rose-500 rotate-90 scale-90' : 'bg-[#0055FF] hover:bg-[#006AFF] hover:scale-110 shadow-[#006AFF]/20'}`}
       >
         {isOpen ? <X className="w-6 h-6 text-white" /> : <MessageSquare className="w-6 h-6 text-white" />}
         {!isOpen && (
            <span className="absolute -top-1 -right-1 flex h-4 w-4">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-4 w-4 bg-indigo-500"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00A9FF] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-4 w-4 bg-[#006AFF]"></span>
           </span>
         )}
       </button>
@@ -78,15 +78,15 @@ export default function ChatAssistant() {
       {isOpen && (
         <div className="absolute bottom-20 right-0 w-[380px] h-[550px] bg-slate-950 border border-slate-800 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-10 duration-300">
           {/* Header */}
-          <div className="p-5 bg-indigo-600/10 border-b border-indigo-500/20 flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
+          <div className="p-5 bg-[#0055FF]/10 border-b border-[#006AFF]/20 flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-[#0055FF] flex items-center justify-center">
               <Bot className="w-6 h-6 text-white" />
             </div>
             <div>
               <h3 className="font-bold text-white text-sm">FinQuantiX Assistant</h3>
               <div className="flex items-center space-x-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-[10px] text-emerald-400 uppercase font-semibold tracking-wider">AI Explainer Online</span>
+                <span className="w-2 h-2 rounded-full bg-[#00E7FF] animate-pulse"></span>
+                <span className="text-[10px] text-[#00F0FF] uppercase font-semibold tracking-wider">AI Explainer Online</span>
               </div>
             </div>
           </div>
@@ -97,7 +97,7 @@ export default function ChatAssistant() {
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`}>
                 <div className={`max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed ${
                   m.role === 'user' 
-                    ? 'bg-indigo-600 text-white rounded-tr-none shadow-lg' 
+                    ? 'bg-[#0055FF] text-white rounded-tr-none shadow-lg' 
                     : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-none shadow-md'
                 }`}>
                   {m.content}
@@ -114,7 +114,7 @@ export default function ChatAssistant() {
                     <button 
                       key={i} 
                       onClick={() => handleSend(q)}
-                      className="text-xs px-3 py-2 bg-indigo-500/5 hover:bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 rounded-lg transition-all"
+                      className="text-xs px-3 py-2 bg-[#006AFF]/5 hover:bg-[#006AFF]/10 border border-[#006AFF]/20 text-[#00C8FF] rounded-lg transition-all"
                     >
                       {q}
                     </button>
@@ -135,11 +135,11 @@ export default function ChatAssistant() {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Ask me a question..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 transition-colors pr-12"
+                className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-white outline-none focus:border-[#006AFF] transition-colors pr-12"
               />
               <button 
                 type="submit"
-                className="absolute right-2 p-2 text-indigo-400 hover:text-indigo-300 transition-colors"
+                className="absolute right-2 p-2 text-[#00A9FF] hover:text-[#00C8FF] transition-colors"
               >
                 <Send className="w-5 h-5" />
               </button>

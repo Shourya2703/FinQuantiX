@@ -106,7 +106,7 @@ function DashboardContent() {
       </div>
       <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
         <div 
-          className="bg-indigo-500 h-1.5 rounded-full transition-all duration-500" 
+          className="bg-[#006AFF] h-1.5 rounded-full transition-all duration-500" 
           style={{ width: `${confidence * 100}%` }}
         ></div>
       </div>
@@ -118,11 +118,11 @@ function DashboardContent() {
       <div className="grid grid-cols-2 gap-5">
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5">Age</label>
-          <input type="number" name="age" value={data.age} onChange={onChange} required min="18" max="100" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-purple-400/40 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300" />
+          <input type="number" name="age" value={data.age} onChange={onChange} required min="18" max="100" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-[#00A9FF]/40 focus:ring-2 focus:ring-[#0088FF] focus:border-[#0088FF] focus:shadow-[0_0_10px_rgba(0,136,255,0.3)] transition-all duration-300" />
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5">Employment</label>
-          <select name="employment_type" value={data.employment_type} onChange={onChange} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-purple-400/40 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300">
+          <select name="employment_type" value={data.employment_type} onChange={onChange} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-[#00A9FF]/40 focus:ring-2 focus:ring-[#0088FF] focus:border-[#0088FF] focus:shadow-[0_0_10px_rgba(0,136,255,0.3)] transition-all duration-300">
             <option value="Employed">Employed</option><option value="Self-Employed">Self-Employed</option><option value="Unemployed">Unemployed</option>
           </select>
         </div>
@@ -130,31 +130,31 @@ function DashboardContent() {
       <div className="grid grid-cols-2 gap-5">
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5 flex items-center"><DollarSign className="w-3 h-3 mr-1" /> Annual Income</label>
-          <input type="number" name="income" value={data.income} onChange={onChange} required min="0" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-purple-400/40 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300" />
+          <input type="number" name="income" value={data.income} onChange={onChange} required min="0" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-[#00A9FF]/40 focus:ring-2 focus:ring-[#0088FF] focus:border-[#0088FF] focus:shadow-[0_0_10px_rgba(0,136,255,0.3)] transition-all duration-300" />
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5">Credit Score</label>
-          <input type="number" name="credit_history" value={data.credit_history} onChange={onChange} required min="300" max="850" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-purple-400/40 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300" />
+          <input type="number" name="credit_history" value={data.credit_history} onChange={onChange} required min="300" max="850" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-[#00A9FF]/40 focus:ring-2 focus:ring-[#0088FF] focus:border-[#0088FF] focus:shadow-[0_0_10px_rgba(0,136,255,0.3)] transition-all duration-300" />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-5">
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5">Existing Loans</label>
-          <input type="number" name="existing_loans" value={data.existing_loans} onChange={onChange} required min="0" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-purple-400/40 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300" />
+          <input type="number" name="existing_loans" value={data.existing_loans} onChange={onChange} required min="0" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-[#00A9FF]/40 focus:ring-2 focus:ring-[#0088FF] focus:border-[#0088FF] focus:shadow-[0_0_10px_rgba(0,136,255,0.3)] transition-all duration-300" />
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5 flex items-center"><Percent className="w-3 h-3 mr-1" /> DTI Ratio</label>
-          <input type="number" name="debt_to_income_ratio" value={data.debt_to_income_ratio} onChange={onChange} required min="0" max="1" step="0.01" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-purple-400/40 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300" />
+          <input type="number" name="debt_to_income_ratio" value={data.debt_to_income_ratio} onChange={onChange} required min="0" max="1" step="0.01" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-[#00A9FF]/40 focus:ring-2 focus:ring-[#0088FF] focus:border-[#0088FF] focus:shadow-[0_0_10px_rgba(0,136,255,0.3)] transition-all duration-300" />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-5">
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5">Loan Amount</label>
-          <input type="number" name="loan_amount" value={data.loan_amount} onChange={onChange} required min="100" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-purple-400/40 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300" />
+          <input type="number" name="loan_amount" value={data.loan_amount} onChange={onChange} required min="100" className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-[#00A9FF]/40 focus:ring-2 focus:ring-[#0088FF] focus:border-[#0088FF] focus:shadow-[0_0_10px_rgba(0,136,255,0.3)] transition-all duration-300" />
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-400 mb-1.5">Loan Term</label>
-          <select name="loan_term" value={data.loan_term} onChange={onChange} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-purple-400/40 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all duration-300">
+          <select name="loan_term" value={data.loan_term} onChange={onChange} className="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-slate-200 outline-none hover:border-[#00A9FF]/40 focus:ring-2 focus:ring-[#0088FF] focus:border-[#0088FF] focus:shadow-[0_0_10px_rgba(0,136,255,0.3)] transition-all duration-300">
             <option value="12">12 Months</option><option value="24">24 Months</option><option value="36">36 Months</option><option value="48">48 Months</option><option value="60">60 Months</option>
           </select>
         </div>
@@ -164,12 +164,12 @@ function DashboardContent() {
 
   const renderResultPanel = (res: any) => (
     <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden animate-fade-in-up">
-      <div className={`absolute top-0 left-0 w-full h-1 ${res.approved ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
+      <div className={`absolute top-0 left-0 w-full h-1 ${res.approved ? 'bg-[#00E7FF]' : 'bg-rose-500'}`}></div>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="w-full">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-3xl font-bold flex items-center">
-              {res.approved ? <><ShieldCheck className="w-8 h-8 mr-3 text-emerald-500" /> <span className="text-emerald-400">Approved</span></> : <><ShieldAlert className="w-8 h-8 mr-3 text-rose-500" /> <span className="text-rose-400">High Risk</span></>}
+              {res.approved ? <><ShieldCheck className="w-8 h-8 mr-3 text-[#00E7FF]" /> <span className="text-[#00F0FF]">Approved</span></> : <><ShieldAlert className="w-8 h-8 mr-3 text-rose-500" /> <span className="text-rose-400">High Risk</span></>}
             </h2>
             <div className="bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 text-sm font-mono text-slate-300 shadow-inner">
               Base: {res.base_value.toFixed(2)}
@@ -177,7 +177,7 @@ function DashboardContent() {
           </div>
           <div className="ml-11 flex items-center justify-between mt-2 text-sm text-slate-400 bg-slate-950/30 p-3 rounded-xl border border-slate-800/50">
             <div>Approval Prob: <span className="text-slate-200 font-bold ml-1">{((1 - res.risk_probability) * 100).toFixed(1)}%</span></div>
-            <div>Risk Level: <span className={`font-bold ml-1 ${res.risk_level === 'High' ? 'text-rose-400' : res.risk_level === 'Medium' ? 'text-amber-400' : 'text-emerald-400'}`}>{res.risk_level}</span></div>
+            <div>Risk Level: <span className={`font-bold ml-1 ${res.risk_level === 'High' ? 'text-rose-400' : res.risk_level === 'Medium' ? 'text-amber-400' : 'text-[#00F0FF]'}`}>{res.risk_level}</span></div>
           </div>
           <div className="ml-11 mt-2">
             <ConfidenceIndicator confidence={res.confidence} />
@@ -191,7 +191,7 @@ function DashboardContent() {
           <ul className="space-y-2">
             {res.natural_language_explanation.map((text: string, idx: number) => (
               <li key={idx} className="flex items-start text-sm text-slate-300">
-                <ArrowRight className={`w-4 h-4 mr-2 flex-shrink-0 mt-0.5 ${text.includes('High risk factor') ? 'text-rose-500' : 'text-emerald-500'}`} />
+                <ArrowRight className={`w-4 h-4 mr-2 flex-shrink-0 mt-0.5 ${text.includes('High risk factor') ? 'text-rose-500' : 'text-[#00E7FF]'}`} />
                 <span>{text.replace('High risk factor: ', '').replace('Low risk factor: ', '')}</span>
               </li>
             ))}
@@ -202,10 +202,10 @@ function DashboardContent() {
   );
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-100 font-sans selection:bg-indigo-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[#03091A] text-slate-100 font-sans selection:bg-[#006AFF]/30 overflow-x-hidden">
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none mix-blend-overlay fixed"></div>
-      <div className="fixed top-0 -left-1/4 w-[50%] h-[50%] bg-indigo-900 rounded-full mix-blend-screen filter blur-[120px] opacity-10 pointer-events-none"></div>
-      <div className="fixed bottom-0 -right-1/4 w-[50%] h-[50%] bg-purple-900 rounded-full mix-blend-screen filter blur-[120px] opacity-10 pointer-events-none"></div>
+      <div className="fixed top-0 -left-1/4 w-[50%] h-[50%] bg-[#000E75] rounded-full mix-blend-screen filter blur-[120px] opacity-10 pointer-events-none"></div>
+      <div className="fixed bottom-0 -right-1/4 w-[50%] h-[50%] bg-[#000E75] rounded-full mix-blend-screen filter blur-[120px] opacity-10 pointer-events-none"></div>
 
       {/* Navigation handled by layout.tsx Navbar */}
       <main className="container mx-auto px-4 py-10 relative z-10 max-w-7xl">
@@ -213,13 +213,13 @@ function DashboardContent() {
         {/* PREDICTOR TAB */}
         {activeTab === 'new' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fade-in">
-            <div className="lg:col-span-5 bg-gradient-to-br from-[#0b0f1a] to-[#0f172a] backdrop-blur-md border border-purple-500/20 rounded-3xl p-8 shadow-[0_0_15px_rgba(168,85,247,0.15)] hover:border-purple-500/40 hover:shadow-[0_0_30px_rgba(168,85,247,0.25)] transition-all duration-500">
+            <div className="lg:col-span-5 bg-gradient-to-br from-[#0b0f1a] to-[#0f172a] backdrop-blur-md border border-[#0088FF]/20 rounded-3xl p-8 shadow-[0_0_15px_rgba(0,136,255,0.15)] hover:border-[#0088FF]/40 hover:shadow-[0_0_30px_rgba(0,136,255,0.25)] transition-all duration-500">
               <h2 className="text-xl font-semibold mb-6 flex items-center text-slate-200 border-b border-white/5 pb-4">
-                <User className="w-5 h-5 mr-2 text-purple-400" /> Applicant Profile
+                <User className="w-5 h-5 mr-2 text-[#00A9FF]" /> Applicant Profile
               </h2>
               <form onSubmit={handleSubmit} className="space-y-5">
                 {renderFormFields(formData, handleChange)}
-                <button type="submit" disabled={loading} className="w-full mt-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium py-3.5 px-4 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:shadow-xl hover:scale-[1.02] flex justify-center items-center">
+                <button type="submit" disabled={loading} className="w-full mt-6 bg-gradient-to-r from-[#0055FF] to-[#0066FF] hover:from-[#006AFF] hover:to-[#0088FF] text-white font-medium py-3.5 px-4 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(0,106,255,0.3)] hover:shadow-xl hover:scale-[1.02] flex justify-center items-center">
                   {loading ? <span className="animate-pulse">Analyzing Risk...</span> : 'Run Risk Analysis'}
                 </button>
               </form>
@@ -228,8 +228,8 @@ function DashboardContent() {
             <div className="lg:col-span-7 flex flex-col gap-6">
               {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-xl">{error}</div>}
               {!result && !error && (
-                <div className="h-full min-h-[400px] border border-purple-500/20 border-dashed rounded-3xl flex flex-col items-center justify-center text-slate-400 bg-slate-900/40 shadow-[0_0_15px_rgba(168,85,247,0.05)]">
-                  <Activity className="w-16 h-16 mb-5 opacity-40 text-purple-400" />
+                <div className="h-full min-h-[400px] border border-[#0088FF]/20 border-dashed rounded-3xl flex flex-col items-center justify-center text-slate-400 bg-slate-900/40 shadow-[0_0_15px_rgba(0,136,255,0.05)]">
+                  <Activity className="w-16 h-16 mb-5 opacity-40 text-[#00A9FF]" />
                   <p className="text-xl font-semibold tracking-wide">Fill out the profile to view AI analysis.</p>
                 </div>
               )}
@@ -238,7 +238,7 @@ function DashboardContent() {
                   {renderResultPanel(result)}
                   <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 rounded-3xl p-6 shadow-xl animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                     <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-6 flex items-center">
-                      <Activity className="w-4 h-4 mr-2 text-purple-400" /> Feature Contributions (SHAP)
+                      <Activity className="w-4 h-4 mr-2 text-[#00A9FF]" /> Feature Contributions (SHAP)
                     </h3>
                     <div className="h-[280px] w-full">
                       <ResponsiveContainer width="100%" height="100%">
@@ -273,8 +273,8 @@ function DashboardContent() {
               <div className="lg:col-span-4 bg-slate-900/40 backdrop-blur-md border border-slate-800/80 rounded-3xl p-6 shadow-xl relative">
                 {whatIfLoading && (
                   <div className="absolute top-4 right-4 flex items-center">
-                    <div className="w-2 h-2 bg-indigo-500 rounded-full animate-ping"></div>
-                    <span className="text-xs text-indigo-400 ml-2 font-medium">Updating</span>
+                    <div className="w-2 h-2 bg-[#006AFF] rounded-full animate-ping"></div>
+                    <span className="text-xs text-[#00A9FF] ml-2 font-medium">Updating</span>
                   </div>
                 )}
                 <h3 className="text-lg font-semibold mb-6 flex items-center text-slate-200">Parameters</h3>
@@ -290,14 +290,14 @@ function DashboardContent() {
                     {/* Simplified Comparison/Feature view */}
                     <div className="grid grid-cols-2 gap-6">
                        <div className="bg-slate-900/40 backdrop-blur-md border border-emerald-900/30 rounded-3xl p-6">
-                         <h4 className="text-sm font-semibold text-emerald-400 mb-4">Top Positive Factors (Lower Risk)</h4>
+                         <h4 className="text-sm font-semibold text-[#00F0FF] mb-4">Top Positive Factors (Lower Risk)</h4>
                          {whatIfResult.top_negative_contributors.map((c: any, i: number) => (
                            <div key={i} className="mb-3">
                              <div className="flex justify-between text-xs text-slate-300 mb-1">
                                <span>{c.feature} ({c.value})</span>
-                               <span className="text-emerald-400">{c.contribution.toFixed(3)}</span>
+                               <span className="text-[#00F0FF]">{c.contribution.toFixed(3)}</span>
                              </div>
-                             <div className="w-full bg-slate-800 rounded-full h-1"><div className="bg-emerald-500 h-1 rounded-full" style={{width: `${Math.min(100, Math.abs(c.contribution)*1000)}%`}}></div></div>
+                             <div className="w-full bg-slate-800 rounded-full h-1"><div className="bg-[#00E7FF] h-1 rounded-full" style={{width: `${Math.min(100, Math.abs(c.contribution)*1000)}%`}}></div></div>
                            </div>
                          ))}
                        </div>
@@ -330,19 +330,19 @@ function DashboardContent() {
           <div className="animate-fade-in space-y-8">
             {metrics ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-center hover:border-indigo-500/30 hover:shadow-[0_0_20px_rgba(99,102,241,0.15)] transition-all duration-300">
+                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-center hover:border-[#006AFF]/30 hover:shadow-[0_0_20px_rgba(0,106,255,0.15)] transition-all duration-300">
                   <div className="text-sm text-slate-400 font-medium mb-1">Model Accuracy</div>
-                  <div className="text-4xl font-bold text-indigo-400">{(metrics.accuracy * 100).toFixed(1)}%</div>
+                  <div className="text-4xl font-bold text-[#00A9FF]">{(metrics.accuracy * 100).toFixed(1)}%</div>
                   <div className="text-xs text-slate-500 mt-2">Test set performance</div>
                 </div>
-                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-center hover:border-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)] transition-all duration-300">
+                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-center hover:border-[#0088FF]/30 hover:shadow-[0_0_20px_rgba(0,136,255,0.15)] transition-all duration-300">
                   <div className="text-sm text-slate-400 font-medium mb-1">ROC AUC Score</div>
-                  <div className="text-4xl font-bold text-purple-400">{metrics.roc_auc.toFixed(3)}</div>
+                  <div className="text-4xl font-bold text-[#00A9FF]">{metrics.roc_auc.toFixed(3)}</div>
                   <div className="text-xs text-slate-500 mt-2">Discriminative power</div>
                 </div>
-                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-center hover:border-emerald-500/30 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] transition-all duration-300">
+                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-center hover:border-[#00E7FF]/30 hover:shadow-[0_0_20px_rgba(0,169,255,0.15)] transition-all duration-300">
                   <div className="text-sm text-slate-400 font-medium mb-1">Predictions Today</div>
-                  <div className="text-4xl font-bold text-emerald-400">{history.length}</div>
+                  <div className="text-4xl font-bold text-[#00F0FF]">{history.length}</div>
                   <div className="text-xs text-slate-500 mt-2">In-memory session tracking</div>
                 </div>
               </div>
@@ -359,7 +359,7 @@ function DashboardContent() {
                         <XAxis dataKey="fpr" type="number" stroke="#475569" fontSize={11} domain={[0, 1]} tickFormatter={(val) => val.toFixed(1)} />
                         <YAxis dataKey="tpr" type="number" stroke="#475569" fontSize={11} domain={[0, 1]} tickFormatter={(val) => val.toFixed(1)} />
                         <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
-                        <Line type="monotone" dataKey="tpr" stroke="#818cf8" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
+                        <Line type="monotone" dataKey="tpr" stroke="#00E7FF" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -375,7 +375,7 @@ function DashboardContent() {
                         <XAxis type="number" hide />
                         <YAxis dataKey="feature" type="category" width={100} stroke="#94a3b8" fontSize={10} tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                         <Tooltip cursor={{ fill: 'rgba(255,255,255,0.02)' }} contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', fontSize: '12px' }} />
-                        <Bar dataKey="importance" fill="#c084fc" radius={[0, 4, 4, 0]} barSize={16} />
+                        <Bar dataKey="importance" fill="#006AFF" radius={[0, 4, 4, 0]} barSize={16} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -411,7 +411,7 @@ function DashboardContent() {
                           <td className="px-4 py-3">{(h.result.risk_probability * 100).toFixed(1)}%</td>
                           <td className="px-4 py-3">{(h.result.confidence * 100).toFixed(0)}%</td>
                           <td className="px-4 py-3">
-                            <span className={`px-2 py-1 rounded text-xs font-semibold ${h.result.approved ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                            <span className={`px-2 py-1 rounded text-xs font-semibold ${h.result.approved ? 'bg-[#00E7FF]/20 text-[#00F0FF]' : 'bg-rose-500/20 text-rose-400'}`}>
                               {h.result.approved ? 'Approve' : 'Deny'}
                             </span>
                           </td>
@@ -440,7 +440,7 @@ function DashboardContent() {
 
 export default function Home() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#020617] flex items-center justify-center text-indigo-400">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#03091A] flex items-center justify-center text-[#00A9FF]">Loading...</div>}>
       <DashboardContent />
     </Suspense>
   );

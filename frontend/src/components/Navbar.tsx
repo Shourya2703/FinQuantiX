@@ -4,16 +4,22 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import { Activity, ShieldCheck, LogOut, ChevronRight, X, Sparkles } from 'lucide-react';
+import { ShieldCheck, LogOut, X, Sparkles, User, Mail, Lock, KeyRound } from 'lucide-react';
+import Image from 'next/image';
 
 function NavbarContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isAuth, setIsAuth] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [authStep, setAuthStep] = useState(1);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [authStep, setAuthStep] = useState(1); // 1: Info, 2: OTP
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: ''
+  });
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -24,39 +30,42 @@ function NavbarContent() {
     }
   }, []);
 
-  const handleAuth = async (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
     try {
-      if (authStep === 1) {
-        const res = await fetch('http://127.0.0.1:8000/auth/send-otp', {
+      const endpoint = authMode === 'signup' ? '/auth/signup' : '/auth/login';
+      const body = authMode === 'signup' 
+        ? { first_name: formData.firstName, last_name: formData.lastName, email: formData.email, password: formData.password }
+        : { email: formData.email };
+
+      const res = await fetch(`http://127.0.0.1:8000${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (res.ok) {
+        // Send OTP
+        const otpRes = await fetch('http://127.0.0.1:8000/auth/send-otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
+          body: JSON.stringify({ email: formData.email })
         });
-        if (res.ok) {
+        
+        if (otpRes.ok) {
           setAuthStep(2);
         } else {
-          setError('Failed to send OTP');
+          setError('Failed to send OTP. Please try again.');
         }
       } else {
-        const res = await fetch('http://127.0.0.1:8000/auth/verify-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, otp })
-        });
-        if (res.ok) {
-          setIsAuth(true);
-          setShowModal(false);
-          localStorage.setItem('finquantix_auth', 'true');
-          setAuthStep(1);
-          setEmail('');
-          setOtp('');
-          window.location.href = '/dashboard?tab=new';
-        } else {
-          setError('Invalid OTP. Please try again.');
-        }
+        const data = await res.json();
+        setError(data.detail || 'Authentication failed.');
       }
     } catch (err) {
       setError('Connection error. Is backend running?');
@@ -64,31 +73,24 @@ function NavbarContent() {
     setIsLoading(false);
   };
 
-  const handleGoogleLoginStep = () => {
-    setAuthStep(3);
-    setError('');
-  };
-
-  const handleGoogleAuth = async (e: React.FormEvent) => {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
     try {
-      const res = await fetch('http://127.0.0.1:8000/auth/google-login', {
+      const res = await fetch('http://127.0.0.1:8000/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email: formData.email, otp })
       });
       if (res.ok) {
         setIsAuth(true);
         setShowModal(false);
         localStorage.setItem('finquantix_auth', 'true');
-        setAuthStep(1);
-        setEmail('');
-        setPassword('');
+        resetForm();
         window.location.href = '/dashboard?tab=new';
       } else {
-        setError('Google authentication failed. Please check credentials.');
+        setError('Invalid OTP. Please try again.');
       }
     } catch (err) {
       setError('Connection error. Is backend running?');
@@ -96,18 +98,25 @@ function NavbarContent() {
     setIsLoading(false);
   };
 
+  const resetForm = () => {
+    setAuthStep(1);
+    setFormData({ firstName: '', lastName: '', email: '', password: '' });
+    setOtp('');
+    setError('');
+  };
+
   const handleLogout = () => {
     setIsAuth(false);
     localStorage.removeItem('finquantix_auth');
+    window.location.href = '/';
   };
 
   const NavLink = ({ href, label, activeTab }: { href: string, label: string, activeTab?: string }) => {
     const isActive = pathname === href || (searchParams?.get('tab') === activeTab);
-    
     return (
       <Link 
         href={href} 
-        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${isActive ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
+        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${isActive ? 'bg-[#006AFF]/20 text-[#00C8FF] border border-[#006AFF]/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
       >
         {label}
       </Link>
@@ -116,13 +125,13 @@ function NavbarContent() {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-[#060B19]/80 backdrop-blur-xl border-b border-purple-500/30 shadow-[0_4px_30px_rgba(168,85,247,0.15)]">
+      <nav className="sticky top-0 z-50 bg-[#030820]/80 backdrop-blur-xl border-b border-[#00A9FF]/20 shadow-[0_4px_30px_rgba(0,169,255,0.1)]">
         <div className="container mx-auto px-6 h-20 flex items-center justify-between max-w-7xl">
           <Link href="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
-              <Activity className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(0,231,255,0.3)] group-hover:shadow-[0_0_25px_rgba(0,231,255,0.5)] group-hover:scale-105 transition-all">
+              <Image src="/neon-logo.png" alt="FinQuantiX" width={40} height={40} className="w-full h-full object-cover" />
             </div>
-            <span className="font-extrabold text-2xl tracking-tight text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">
+            <span className="font-extrabold text-2xl tracking-tight text-white drop-shadow-[0_0_15px_rgba(0,231,255,0.4)]">
               FinQuantiX
             </span>
           </Link>
@@ -137,7 +146,7 @@ function NavbarContent() {
           <div className="flex items-center">
             {isAuth ? (
               <div className="flex items-center space-x-4">
-                <div className="hidden sm:flex items-center space-x-2 text-sm text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
+                <div className="hidden sm:flex items-center space-x-2 text-sm text-[#00F0FF] bg-[#00E7FF]/10 px-3 py-1.5 rounded-lg border border-[#00E7FF]/20">
                   <ShieldCheck className="w-4 h-4" />
                   <span>Verified Analyst</span>
                 </div>
@@ -147,8 +156,8 @@ function NavbarContent() {
               </div>
             ) : (
               <button 
-                onClick={() => setShowModal(true)} 
-                className="group relative px-7 py-3 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 bg-[length:200%_auto] animate-gradient-x hover:scale-105 transition-all duration-500 font-bold text-white shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:shadow-[0_0_35px_rgba(79,70,229,0.6)] flex items-center space-x-2 border border-white/20"
+                onClick={() => {setShowModal(true); setAuthMode('login');}} 
+                className="group relative px-7 py-3 rounded-2xl bg-gradient-to-r from-[#006AFF] via-[#0088FF] to-[#006AFF] bg-[length:200%_auto] animate-gradient-x hover:scale-105 transition-all duration-500 font-bold text-white shadow-[0_0_20px_rgba(0,85,255,0.4)] hover:shadow-[0_0_35px_rgba(0,85,255,0.6)] flex items-center space-x-2 border border-white/20"
               >
                 <Sparkles className="w-4 h-4 text-white animate-pulse" />
                 <span className="tracking-tight">Sign In</span>
@@ -159,121 +168,151 @@ function NavbarContent() {
         </div>
       </nav>
 
-      {/* Auth Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#020617]/80 backdrop-blur-sm animate-fade-in">
-          <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl max-w-md w-full relative">
-            <button onClick={() => {setShowModal(false); setAuthStep(1);}} className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#03091A]/90 backdrop-blur-md animate-fade-in px-4">
+          <div className="bg-[#050D2A] border border-[#00E7FF]/30 p-8 rounded-[2.5rem] shadow-2xl max-w-md w-full relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#00E7FF]/10 blur-[50px] -mr-16 -mt-16"></div>
+            
+            <button onClick={() => {setShowModal(false); resetForm();}} className="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors z-10">
               <X className="w-6 h-6" />
             </button>
             
-            <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 mb-6 mx-auto">
-              <ShieldCheck className="w-8 h-8 text-indigo-400" />
+            <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-[#006AFF]/10 border border-[#006AFF]/20 mb-6 mx-auto relative z-10">
+              <ShieldCheck className="w-8 h-8 text-[#00E7FF]" />
             </div>
             
-            <h3 className="text-2xl font-bold text-center text-white mb-2">
-              {authStep === 1 ? 'Secure Sign In' : authStep === 2 ? 'Verify Identity' : 'Sign in with Google'}
+            <h3 className="text-3xl font-bold text-center text-white mb-2 relative z-10">
+              {authStep === 1 ? (authMode === 'login' ? 'Welcome Back' : 'Create Account') : 'Verify Identity'}
             </h3>
-            <p className="text-center text-slate-400 mb-8 text-sm">
-              {authStep === 1 ? 'Enter your corporate email to receive a secure OTP.' : 
-               authStep === 2 ? `We sent a code to ${email}. Please check your inbox.` :
-               'Use your Google account to access FinQuantiX.'}
+            <p className="text-center text-slate-400 mb-8 text-sm relative z-10">
+              {authStep === 1 
+                ? (authMode === 'login' ? 'Sign in to access your risk workspace.' : 'Join FinQuantiX and start predicting.')
+                : `We sent a 6-digit code to ${formData.email}.`}
             </p>
 
-            {authStep === 3 ? (
-              <form onSubmit={handleGoogleAuth} className="space-y-5 animate-fade-in">
-                {error && <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400 text-sm text-center">{error}</div>}
+            {authStep === 1 ? (
+              <form onSubmit={handleInitialSubmit} className="space-y-4 relative z-10">
+                {error && <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-sm text-center animate-shake">{error}</div>}
+                
+                {authMode === 'signup' && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Name</label>
+                      <div className="relative">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                        <input 
+                          type="text" name="firstName" required value={formData.firstName} onChange={handleChange}
+                          className="w-full bg-slate-950/50 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-[#00E7FF] focus:ring-1 focus:ring-[#00E7FF]/30 transition-all"
+                          placeholder="John"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Surname</label>
+                      <div className="relative">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                        <input 
+                          type="text" name="lastName" required value={formData.lastName} onChange={handleChange}
+                          className="w-full bg-slate-950/50 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-[#00E7FF] focus:ring-1 focus:ring-[#00E7FF]/30 transition-all"
+                          placeholder="Doe"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-2">Gmail Address</label>
-                  <input 
-                    type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                    className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500 transition-colors"
-                    placeholder="example@gmail.com"
-                  />
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Gmail Address</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <input 
+                      type="email" name="email" required value={formData.email} onChange={handleChange}
+                      className="w-full bg-slate-950/50 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-[#00E7FF] focus:ring-1 focus:ring-[#00E7FF]/30 transition-all"
+                      placeholder="analyst@gmail.com"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-2">Password</label>
-                  <input 
-                    type="password" required value={password} onChange={e => setPassword(e.target.value)}
-                    className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500 transition-colors"
-                    placeholder="••••••••"
-                  />
-                </div>
+
+                {authMode === 'signup' && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                      <input 
+                        type="password" name="password" required value={formData.password} onChange={handleChange}
+                        className="w-full bg-slate-950/50 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-[#00E7FF] focus:ring-1 focus:ring-[#00E7FF]/30 transition-all"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <button 
                   type="submit" disabled={isLoading}
-                  className="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3.5 rounded-xl transition-all shadow-lg flex justify-center items-center space-x-2"
+                  className="w-full bg-gradient-to-r from-[#0055FF] to-[#0088FF] hover:from-[#006AFF] hover:to-[#00A9FF] text-white font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(0,85,255,0.3)] hover:shadow-[0_0_30px_rgba(0,231,255,0.4)] hover:-translate-y-0.5 flex justify-center items-center group disabled:opacity-70"
                 >
-                  {isLoading ? <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div> : 'Sign In with Google'}
+                  {isLoading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : (authMode === 'login' ? 'Send Login OTP' : 'Create Account')}
                 </button>
-                <button type="button" onClick={() => setAuthStep(1)} className="w-full text-sm text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
-                  Back to standard login
-                </button>
+
+                <div className="text-center mt-6">
+                  <p className="text-slate-500 text-sm">
+                    {authMode === 'login' ? "Don't have an account?" : "Already have an account?"}
+                    <button 
+                      type="button" 
+                      onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
+                      className="ml-2 text-[#00E7FF] hover:text-white font-bold transition-colors"
+                    >
+                      {authMode === 'login' ? 'Sign Up' : 'Login'}
+                    </button>
+                  </p>
+                </div>
               </form>
             ) : (
-              <form onSubmit={handleAuth} className="space-y-5">
-                {error && <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400 text-sm text-center animate-fade-in">{error}</div>}
-                {authStep === 1 ? (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-400 mb-2">Corporate Email</label>
-                      <input 
-                        type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                        className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500 transition-colors"
-                        placeholder="analyst@finquantix.com"
-                      />
-                    </div>
-                    <button 
-                      type="submit" disabled={isLoading}
-                      className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3.5 rounded-xl transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] disabled:opacity-70 flex justify-center items-center"
-                    >
-                      {isLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : 'Login (existing user)'}
-                    </button>
-                    
-                    <div className="relative flex py-2 items-center">
-                      <div className="flex-grow border-t border-slate-800"></div>
-                      <span className="flex-shrink-0 mx-4 text-slate-500 text-sm">or</span>
-                      <div className="flex-grow border-t border-slate-800"></div>
-                    </div>
-                    
-                    <button 
-                      type="button" onClick={handleGoogleLoginStep} disabled={isLoading}
-                      className="w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg border border-slate-700 disabled:opacity-70 flex justify-center items-center space-x-3"
-                    >
-                      <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                      <span>Continue with Google</span>
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-400 mb-2">One-Time Password</label>
-                      <input 
-                        type="text" required value={otp} onChange={e => setOtp(e.target.value)}
-                        className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500 transition-colors text-center text-2xl tracking-[0.5em] font-mono"
-                        placeholder="••••••"
-                        maxLength={6}
-                      />
-                    </div>
-                    <button 
-                      type="submit" disabled={isLoading}
-                      className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3.5 rounded-xl transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] disabled:opacity-70 flex justify-center items-center"
-                    >
-                      {isLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : 'Verify & Sign In'}
-                    </button>
-                  </>
-                )}
+              <form onSubmit={handleVerifyOtp} className="space-y-6 relative z-10">
+                {error && <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-sm text-center animate-shake">{error}</div>}
+                
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 text-center">Enter 6-digit Code</label>
+                  <div className="relative">
+                    <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#00E7FF]" />
+                    <input 
+                      type="text" required value={otp} onChange={e => setOtp(e.target.value)}
+                      className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl pl-12 pr-4 py-5 text-white outline-none focus:border-[#00E7FF] focus:ring-1 focus:ring-[#00E7FF]/30 transition-all text-center text-3xl tracking-[0.4em] font-mono"
+                      placeholder="000000"
+                      maxLength={6}
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-[#00E7FF] to-[#0055FF] text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(0,231,255,0.3)] hover:shadow-[0_0_40px_rgba(0,231,255,0.5)] transition-all flex justify-center items-center"
+                >
+                  {isLoading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : 'Verify & Complete'}
+                </button>
+                
+                <button type="button" onClick={() => setAuthStep(1)} className="w-full text-sm text-slate-500 hover:text-white transition-colors text-center">
+                  Entered wrong email? Go back
+                </button>
               </form>
             )}
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes fade-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+        .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
+      `}</style>
     </>
   );
 }
 
 export default function Navbar() {
   return (
-    <Suspense fallback={<nav className="h-20 bg-[#060B19] border-b-2 border-indigo-500/20"></nav>}>
+    <Suspense fallback={<nav className="h-20 bg-[#030820] border-b-2 border-[#006AFF]/20"></nav>}>
       <NavbarContent />
     </Suspense>
   );
