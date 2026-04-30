@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
-import { Activity, ShieldCheck, ShieldAlert, DollarSign, Briefcase, User, Percent, LayoutDashboard, Sliders, FileText, ArrowRight } from 'lucide-react';
+import { Activity, ShieldCheck, ShieldAlert, DollarSign, Briefcase, User, Percent, LayoutDashboard, Sliders, FileText, ArrowRight, Lock } from 'lucide-react';
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -37,14 +37,28 @@ function DashboardContent() {
   const [metrics, setMetrics] = useState<any>(null);
   const [history, setHistory] = useState<any[]>([]);
   const [featureImportance, setFeatureImportance] = useState<any[]>([]);
+  const [isAuth, setIsAuth] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    if (activeTab === 'dashboard') {
-      fetch('http://127.0.0.1:8000/metrics').then(res => res.json()).then(setMetrics);
-      fetch('http://127.0.0.1:8000/history').then(res => res.json()).then(setHistory);
-      fetch('http://127.0.0.1:8000/feature-importance').then(res => res.json()).then(data => setFeatureImportance(data.global_feature_importance));
+    setIsClient(true);
+    const storedToken = localStorage.getItem('finquantix_token');
+    const authStatus = localStorage.getItem('finquantix_auth') === 'true';
+    setIsAuth(authStatus);
+    setToken(storedToken);
+  }, []);
+
+  useEffect(() => {
+    fetch('http://127.0.0.1:8000/metrics').then(res => res.json()).then(setMetrics);
+    fetch('http://127.0.0.1:8000/feature-importance').then(res => res.json()).then(data => setFeatureImportance(data.global_feature_importance));
+
+    if (isAuth && token) {
+      fetch('http://127.0.0.1:8000/history', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).then(res => res.json()).then(setHistory);
     }
-  }, [activeTab]);
+  }, [activeTab, isAuth, token]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -61,8 +75,14 @@ function DashboardContent() {
         debt_to_income_ratio: parseFloat(formData.debt_to_income_ratio), loan_amount: parseFloat(formData.loan_amount),
         loan_term: parseInt(formData.loan_term)
       };
+      const token = localStorage.getItem('finquantix_token');
       const response = await fetch('http://127.0.0.1:8000/predict', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        method: 'POST', 
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }, 
+        body: JSON.stringify(payload)
       });
       if (!response.ok) throw new Error('Failed to predict risk');
       const data = await response.json();
@@ -219,9 +239,18 @@ function DashboardContent() {
               </h2>
               <form onSubmit={handleSubmit} className="space-y-5">
                 {renderFormFields(formData, handleChange)}
-                <button type="submit" disabled={loading} className="w-full mt-6 bg-gradient-to-r from-[#0055FF] to-[#0066FF] hover:from-[#006AFF] hover:to-[#0088FF] text-white font-medium py-3.5 px-4 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(0,106,255,0.3)] hover:shadow-xl hover:scale-[1.02] flex justify-center items-center">
-                  {loading ? <span className="animate-pulse">Analyzing Risk...</span> : 'Run Risk Analysis'}
-                </button>
+                {isClient && isAuth ? (
+                  <button type="submit" disabled={loading} className="w-full mt-6 bg-gradient-to-r from-[#0055FF] to-[#0066FF] hover:from-[#006AFF] hover:to-[#0088FF] text-white font-medium py-3.5 px-4 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(0,106,255,0.3)] hover:shadow-xl hover:scale-[1.02] flex justify-center items-center">
+                    {loading ? <span className="animate-pulse">Analyzing Risk...</span> : 'Run Risk Analysis'}
+                  </button>
+                ) : isClient ? (
+                  <div className="mt-6 p-4 bg-[#006AFF]/10 border border-[#006AFF]/20 rounded-xl text-center">
+                    <p className="text-sm text-[#00E7FF] font-semibold mb-2">Authentication Required</p>
+                    <p className="text-xs text-slate-400">Please sign in to run predictions and save history.</p>
+                  </div>
+                ) : (
+                  <div className="h-12 bg-slate-800 rounded-xl animate-pulse"></div>
+                )}
               </form>
             </div>
 
@@ -385,43 +414,53 @@ function DashboardContent() {
 
             <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl overflow-hidden hover:border-slate-700 transition-colors">
               <h3 className="text-sm font-semibold text-slate-300 mb-6">Recent Prediction History</h3>
-              {history.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm text-slate-400">
-                    <thead className="text-xs uppercase bg-slate-950/50 text-slate-500">
-                      <tr>
-                        <th className="px-4 py-3 rounded-tl-lg">Age</th>
-                        <th className="px-4 py-3">Income</th>
-                        <th className="px-4 py-3">Credit</th>
-                        <th className="px-4 py-3">DTI</th>
-                        <th className="px-4 py-3">Loan Amt</th>
-                        <th className="px-4 py-3">Prob</th>
-                        <th className="px-4 py-3">Confidence</th>
-                        <th className="px-4 py-3 rounded-tr-lg">Result</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {history.slice(0, 10).map((h: any, i: number) => (
-                        <tr key={i} className="border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
-                          <td className="px-4 py-3">{h.input.age}</td>
-                          <td className="px-4 py-3">${h.input.income}</td>
-                          <td className="px-4 py-3">{h.input.credit_history}</td>
-                          <td className="px-4 py-3">{h.input.debt_to_income_ratio}</td>
-                          <td className="px-4 py-3">${h.input.loan_amount}</td>
-                          <td className="px-4 py-3">{(h.result.risk_probability * 100).toFixed(1)}%</td>
-                          <td className="px-4 py-3">{(h.result.confidence * 100).toFixed(0)}%</td>
-                          <td className="px-4 py-3">
-                            <span className={`px-2 py-1 rounded text-xs font-semibold ${h.result.approved ? 'bg-[#00E7FF]/20 text-[#00F0FF]' : 'bg-rose-500/20 text-rose-400'}`}>
-                              {h.result.approved ? 'Approve' : 'Deny'}
-                            </span>
-                          </td>
+              {isClient && isAuth ? (
+                history.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm text-slate-400">
+                      <thead className="text-xs uppercase bg-slate-950/50 text-slate-500">
+                        <tr>
+                          <th className="px-4 py-3 rounded-tl-lg">Age</th>
+                          <th className="px-4 py-3">Income</th>
+                          <th className="px-4 py-3">Credit</th>
+                          <th className="px-4 py-3">DTI</th>
+                          <th className="px-4 py-3">Loan Amt</th>
+                          <th className="px-4 py-3">Prob</th>
+                          <th className="px-4 py-3">Confidence</th>
+                          <th className="px-4 py-3 rounded-tr-lg">Result</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {history.slice(0, 10).map((h: any, i: number) => (
+                          <tr key={i} className="border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
+                            <td className="px-4 py-3">{h.input.age}</td>
+                            <td className="px-4 py-3">${h.input.income}</td>
+                            <td className="px-4 py-3">{h.input.credit_history}</td>
+                            <td className="px-4 py-3">{h.input.debt_to_income_ratio}</td>
+                            <td className="px-4 py-3">${h.input.loan_amount}</td>
+                            <td className="px-4 py-3">{(h.result.risk_probability * 100).toFixed(1)}%</td>
+                            <td className="px-4 py-3">{(h.result.confidence * 100).toFixed(0)}%</td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-1 rounded text-xs font-semibold ${h.result.approved ? 'bg-[#00E7FF]/20 text-[#00F0FF]' : 'bg-rose-500/20 text-rose-400'}`}>
+                                {h.result.approved ? 'Approve' : 'Deny'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-slate-500 text-sm">No predictions recorded yet.</div>
+                )
+              ) : isClient ? (
+                <div className="text-center py-12 bg-slate-950/50 rounded-2xl border border-dashed border-slate-800">
+                  <Lock className="w-8 h-8 text-slate-600 mx-auto mb-3" />
+                  <p className="text-slate-400 font-medium">Sign in to view your prediction history</p>
+                  <p className="text-xs text-slate-600 mt-1">Your risk assessments are secure and private.</p>
                 </div>
               ) : (
-                <div className="text-center py-8 text-slate-500 text-sm">No predictions recorded yet.</div>
+                <div className="h-32 bg-slate-900 animate-pulse rounded-2xl"></div>
               )}
             </div>
           </div>

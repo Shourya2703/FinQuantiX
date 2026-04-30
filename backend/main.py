@@ -1,17 +1,27 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, Header
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
 from ml_model import model_instance
 import requests
 import random
 import os
+import jwt
+import datetime
+from typing import Optional
 
-RESEND_API_KEY = "re_HEsog1YF_EXEaA6AL8v7GnJ94wRodsm69" 
+# Configuration
+RESEND_API_KEY = "re_HEsog1YF_EXEaA6AL8v7GnJ94wRodsm69"
+JWT_SECRET = "finquantix-super-secret-key-2026"
+JWT_ALGORITHM = "HS256"
 
 app = FastAPI(title="Credit Risk Predictor API")
+security = HTTPBearer()
 
-prediction_history = []
-otp_store = {}
+# In-memory stores
+user_store = {} # {email: {first_name, last_name, password, verified}}
+otp_store = {} # {email: otp}
+prediction_history = {} # {email: [predictions]}
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,15 +31,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- Models ---
 class LoanApplication(BaseModel):
-    age: int = Field(..., ge=18, le=100, description="Age of the applicant")
-    income: float = Field(..., ge=0, description="Annual income")
-    employment_type: str = Field(..., description="Employment type (Employed, Self-Employed, Unemployed)")
-    credit_history: int = Field(..., ge=300, le=850, description="Credit score")
-    existing_loans: int = Field(..., ge=0, description="Number of existing loans")
-    debt_to_income_ratio: float = Field(..., ge=0.0, le=1.0, description="Debt to Income ratio (0.0 to 1.0)")
-    loan_amount: float = Field(..., ge=100, description="Requested loan amount")
-    loan_term: int = Field(..., gt=0, description="Loan term in months")
+    age: int = Field(..., ge=18, le=100)
+    income: float = Field(..., ge=0)
+    employment_type: str
+    credit_history: int = Field(..., ge=300, le=850)
+    existing_loans: int = Field(..., ge=0)
+    debt_to_income_ratio: float = Field(..., ge=0.0, le=1.0)
+    loan_amount: float = Field(..., ge=100)
+    loan_term: int = Field(..., gt=0)
 
 class EmailRequest(BaseModel):
     email: str
@@ -47,10 +58,25 @@ class UserSignupRequest(BaseModel):
 class UserLoginRequest(BaseModel):
     email: str
 
-user_store = {} # Simulated DB: {email: {first_name, last_name, password}}
+# --- Auth Helpers ---
+def create_access_token(email: str):
+    expire = datetime.datetime.utcnow() + datetime.timedelta(days=7)
+    to_encode = {"sub": email, "exp": expire}
+    return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
+def get_current_user(auth: HTTPAuthorizationCredentials = Depends(security)):
+    try:
+        payload = jwt.decode(auth.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return email
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
+
+# --- Endpoints ---
 @app.post("/predict")
-def predict_risk(application: LoanApplication):
+def predict_risk(application: LoanApplication, user_email: str = Depends(get_current_user)):
     emp_employed = 1 if application.employment_type == 'Employed' else 0
     emp_self_employed = 1 if application.employment_type == 'Self-Employed' else 0
     emp_unemployed = 1 if application.employment_type == 'Unemployed' else 0
@@ -75,9 +101,19 @@ def predict_risk(application: LoanApplication):
     try:
         result = model_instance.predict_and_explain(input_data)
         
-        prediction_history.insert(0, {"input": input_data, "result": result})
-        if len(prediction_history) > 50:
-            prediction_history.pop()
+        # Save to user-specific history
+        if user_email not in prediction_history:
+            prediction_history[user_email] = []
+        
+        prediction_record = {
+            "input": input_data,
+            "result": result,
+            "timestamp": datetime.datetime.utcnow().isoformat()
+        }
+        prediction_history[user_email].insert(0, prediction_record)
+        
+        if len(prediction_history[user_email]) > 50:
+            prediction_history[user_email].pop()
             
         return result
     except Exception as e:
@@ -85,12 +121,10 @@ def predict_risk(application: LoanApplication):
 
 @app.post("/what-if")
 def what_if_predict(application: LoanApplication):
+    # What-if remains public as it's a playground, but could be restricted if needed
     emp_employed = 1 if application.employment_type == 'Employed' else 0
     emp_self_employed = 1 if application.employment_type == 'Self-Employed' else 0
     emp_unemployed = 1 if application.employment_type == 'Unemployed' else 0
-
-    if application.employment_type not in ['Employed', 'Self-Employed', 'Unemployed']:
-        raise HTTPException(status_code=400, detail="Invalid employment_type")
 
     input_data = {
         'age': application.age,
@@ -105,15 +139,11 @@ def what_if_predict(application: LoanApplication):
         'emp_self_employed': emp_self_employed,
         'emp_unemployed': emp_unemployed
     }
-    
-    try:
-        return model_instance.predict_and_explain(input_data)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return model_instance.predict_and_explain(input_data)
 
 @app.get("/history")
-def get_history():
-    return prediction_history
+def get_history(user_email: str = Depends(get_current_user)):
+    return prediction_history.get(user_email, [])
 
 @app.get("/metrics")
 def get_metrics():
@@ -123,96 +153,69 @@ def get_metrics():
 def get_feature_importance():
     return {"global_feature_importance": model_instance.get_feature_importance()}
 
+# --- Auth ---
 def send_email_otp(email: str, otp: str):
-    if RESEND_API_KEY == "re_123456789":
-        print(f"\n[WARNING] RESEND_API_KEY not configured. OTP for {email}: {otp}\n")
-        return False
-        
+    print(f"--- Attempting to send OTP to {email} ---")
     try:
         url = "https://api.resend.com/emails"
-        headers = {
-            "Authorization": f"Bearer {RESEND_API_KEY}",
-            "Content-Type": "application/json"
-        }
+        headers = {"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"}
         html_content = f"""
         <div style="font-family: sans-serif; max-width: 500px; margin: auto; padding: 40px; background-color: #020617; color: #f8fafc; border-radius: 24px; border: 1px solid #1e293b;">
-            <h1 style="color: #6366f1; text-align: center; margin-bottom: 24px;">FinQuantiX</h1>
-            <p style="font-size: 16px; line-height: 24px;">Hello,</p>
-            <p style="font-size: 16px; line-height: 24px;">Your secure one-time password (OTP) for accessing the Credit Risk Engine is:</p>
-            <div style="background: #0f172a; padding: 24px; border-radius: 16px; text-align: center; margin: 32px 0; border: 1px solid #334155;">
+            <h1 style="color: #00E7FF; text-align: center;">FinQuantiX</h1>
+            <p>Your verification code is:</p>
+            <div style="background: #0f172a; padding: 24px; border-radius: 16px; text-align: center; border: 1px solid #334155;">
                 <span style="font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #ffffff;">{otp}</span>
             </div>
-            <p style="font-size: 14px; color: #94a3b8;">This code will expire in 10 minutes. If you did not request this code, please ignore this email.</p>
-            <hr style="border: 0; border-top: 1px solid #1e293b; margin: 32px 0;">
-            <p style="font-size: 12px; color: #64748b; text-align: center;">&copy; 2026 FinQuantiX AI Systems. Confidential &amp; Secure.</p>
         </div>
         """
-        
-        data = {
-            "from": "FinQuantiX <onboarding@resend.dev>",
-            "to": [email],
-            "subject": f"{otp} is your FinQuantiX verification code",
-            "html": html_content
-        }
-        
-        response = requests.post(url, headers=headers, json=data)
-        return response.status_code == 200 or response.status_code == 201
+        data = {"from": "FinQuantiX <onboarding@resend.dev>", "to": [email], "subject": f"{otp} verification code", "html": html_content}
+        response = requests.post(url, headers=headers, json=data, timeout=5)
+        print(f"Resend Response: {response.status_code} - {response.text}")
+        return response.status_code in [200, 201]
     except Exception as e:
-        print(f"Error sending email: {e}")
+        print(f"Resend Error: {e}")
         return False
 
 @app.post("/auth/signup")
 def signup(req: UserSignupRequest):
     if req.email in user_store:
         raise HTTPException(status_code=400, detail="User already exists")
-    
-    # Store user data temporarily (verified after OTP)
-    user_store[req.email] = {
-        "first_name": req.first_name,
-        "last_name": req.last_name,
-        "password": req.password,
-        "verified": False
-    }
-    return {"status": "success", "message": "User registered. Please verify OTP."}
+    user_store[req.email] = {"first_name": req.first_name, "last_name": req.last_name, "password": req.password, "verified": False}
+    return {"status": "success"}
 
 @app.post("/auth/login")
 def login(req: UserLoginRequest):
     if req.email not in user_store:
         raise HTTPException(status_code=404, detail="User not found")
-    return {"status": "success", "message": "Proceed to OTP verification."}
+    return {"status": "success"}
+
+from fastapi import BackgroundTasks
 
 @app.post("/auth/send-otp")
-def send_otp(req: EmailRequest):
+def send_otp(req: EmailRequest, background_tasks: BackgroundTasks):
     otp = "".join([str(random.randint(0, 9)) for _ in range(6)])
     otp_store[req.email] = otp
     
-    success = send_email_otp(req.email, otp)
+    # Send email in background to prevent frontend hang
+    background_tasks.add_task(send_email_otp, req.email, otp)
     
-    return {
-        "status": "success" if success else "simulated", 
-        "message": "OTP sent successfully" if success else "OTP generated (see terminal for demo)"
-    }
+    print(f"OTP generated for {req.email}: {otp}") 
+    return {"status": "success", "message": "OTP processing"}
 
 @app.post("/auth/verify-otp")
 def verify_otp(req: OTPRequest):
-    stored_otp = otp_store.get(req.email)
-    if stored_otp and req.otp == stored_otp:
+    if otp_store.get(req.email) == req.otp:
         del otp_store[req.email]
-        
-        # Mark user as verified if they were in signup flow
         if req.email in user_store:
             user_store[req.email]["verified"] = True
-            
+        
+        token = create_access_token(req.email)
         return {
             "status": "success", 
-            "token": "fake-jwt-token",
+            "token": token,
             "user": user_store.get(req.email, {"email": req.email})
         }
-    raise HTTPException(status_code=400, detail="Invalid or expired OTP")
-
-@app.get("/")
-def root_check():
-    return {"status": "ok", "message": "Credit Risk Predictor API is running."}
+    raise HTTPException(status_code=400, detail="Invalid OTP")
 
 @app.get("/health")
 def health_check():

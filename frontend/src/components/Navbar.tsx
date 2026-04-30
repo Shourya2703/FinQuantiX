@@ -84,9 +84,12 @@ function NavbarContent() {
         body: JSON.stringify({ email: formData.email, otp })
       });
       if (res.ok) {
+        const data = await res.json();
         setIsAuth(true);
         setShowModal(false);
         localStorage.setItem('finquantix_auth', 'true');
+        localStorage.setItem('finquantix_token', data.token);
+        localStorage.setItem('finquantix_user', JSON.stringify(data.user));
         resetForm();
         window.location.href = '/dashboard?tab=new';
       } else {
@@ -108,6 +111,8 @@ function NavbarContent() {
   const handleLogout = () => {
     setIsAuth(false);
     localStorage.removeItem('finquantix_auth');
+    localStorage.removeItem('finquantix_token');
+    localStorage.removeItem('finquantix_user');
     window.location.href = '/';
   };
 
