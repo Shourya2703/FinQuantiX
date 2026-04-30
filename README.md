@@ -1,5 +1,7 @@
 # FinQuantiX: Next-Gen Credit Risk AI Dashboard 🚀
 
+**Live Demo:** [https://finquantixx.vercel.app](https://finquantixx.vercel.app)
+
 FinQuantiX is a state-of-the-art, full-stack Credit Risk Prediction platform designed for modern financial analysts. It combines advanced Machine Learning (XGBoost) with Model Explainability (SHAP) to provide transparent, data-driven loan approval decisions.
 
 ![FinQuantiX Dashboard](https://raw.githubusercontent.com/Shourya2703/FinQuantiX/main/frontend/public/preview.png)
