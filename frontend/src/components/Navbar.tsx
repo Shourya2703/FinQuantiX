@@ -7,6 +7,8 @@ import { Suspense } from 'react';
 import { ShieldCheck, LogOut, X, Sparkles, User, Mail, Lock, KeyRound } from 'lucide-react';
 import Image from 'next/image';
 
+import { API_BASE_URL } from '../utils/api';
+
 function NavbarContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -44,7 +46,7 @@ function NavbarContent() {
         ? { first_name: formData.firstName, last_name: formData.lastName, email: formData.email, password: formData.password }
         : { email: formData.email };
 
-      const res = await fetch(`http://127.0.0.1:8000${endpoint}`, {
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -52,7 +54,7 @@ function NavbarContent() {
 
       if (res.ok) {
         // Send OTP
-        const otpRes = await fetch('http://127.0.0.1:8000/auth/send-otp', {
+        const otpRes = await fetch(`${API_BASE_URL}/auth/send-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: formData.email })
@@ -78,7 +80,7 @@ function NavbarContent() {
     setIsLoading(true);
     setError('');
     try {
-      const res = await fetch('http://127.0.0.1:8000/auth/verify-otp', {
+      const res = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, otp })

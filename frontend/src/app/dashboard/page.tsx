@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
 import { Activity, ShieldCheck, ShieldAlert, DollarSign, Briefcase, User, Percent, LayoutDashboard, Sliders, FileText, ArrowRight, Lock } from 'lucide-react';
+import { API_BASE_URL } from '@/utils/api';
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -50,11 +51,11 @@ function DashboardContent() {
   }, []);
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/metrics').then(res => res.json()).then(setMetrics);
-    fetch('http://127.0.0.1:8000/feature-importance').then(res => res.json()).then(data => setFeatureImportance(data.global_feature_importance));
+    fetch(`${API_BASE_URL}/metrics`).then(res => res.json()).then(setMetrics);
+    fetch(`${API_BASE_URL}/feature-importance`).then(res => res.json()).then(data => setFeatureImportance(data.global_feature_importance));
 
     if (isAuth && token) {
-      fetch('http://127.0.0.1:8000/history', {
+      fetch(`${API_BASE_URL}/history`, {
         headers: { 'Authorization': `Bearer ${token}` }
       }).then(res => res.json()).then(setHistory);
     }
@@ -76,7 +77,7 @@ function DashboardContent() {
         loan_term: parseInt(formData.loan_term)
       };
       const token = localStorage.getItem('finquantix_token');
-      const response = await fetch('http://127.0.0.1:8000/predict', {
+      const response = await fetch(`${API_BASE_URL}/predict`, {
         method: 'POST', 
         headers: { 
           'Content-Type': 'application/json',
@@ -108,7 +109,7 @@ function DashboardContent() {
             debt_to_income_ratio: parseFloat(whatIfData.debt_to_income_ratio), loan_amount: parseFloat(whatIfData.loan_amount),
             loan_term: parseInt(whatIfData.loan_term)
           };
-          const response = await fetch('http://127.0.0.1:8000/what-if', {
+          const response = await fetch(`${API_BASE_URL}/what-if`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
           });
           if (response.ok) setWhatIfResult(await response.json());
