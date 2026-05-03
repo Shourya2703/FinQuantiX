@@ -1,39 +1,163 @@
 @import "tailwindcss";
 
 :root {
-  --background: #03091A;
-  --foreground: #f0f8ff;
+  --background: #01040a;
+  --foreground: #ffffff;
+  --primary: #4f46e5;
+  --primary-glow: rgba(79, 70, 229, 0.6);
+  --accent: #f59e0b;
+  --glass: rgba(0, 0, 0, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.08);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Grainy Texture Overlay */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 50;
+  mix-blend-mode: overlay;
+}
+
+/* Grid Lines Overlay with Scanning Line */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 100px 100px;
+  pointer-events: none;
+  z-index: 1;
+  animation: move-grid 20s linear infinite;
+}
+
+@keyframes move-grid {
+  0% { background-position: 0px 0px; }
+  100% { background-position: 100px 100px; }
+}
+
+/* Scanning Line Effect */
+.scan-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, rgba(79, 70, 229, 0.2), transparent);
+  z-index: 2;
+  pointer-events: none;
+  animation: scan 8s linear infinite;
+}
+
+@keyframes scan {
+  from { transform: translateY(-100vh); }
+  to { transform: translateY(200vh); }
 }
 
 @layer utilities {
-  @keyframes gradient-x {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-  .animate-gradient-x {
-    background-size: 200% 200%;
-    animation: gradient-x 6s ease infinite;
+  .glass-panel {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
   }
 
-  @keyframes pulse-slow {
-    0% { opacity: 0.3; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.05); }
-    100% { opacity: 0.3; transform: scale(1); }
+  .glass-glow {
+    border: 1px solid rgba(79, 70, 229, 0.3);
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.1);
   }
-  .animate-pulse-slow {
-    animation: pulse-slow 8s infinite alternate;
+
+  .glow-button-blue {
+    background: linear-gradient(135deg, #4f46e5, #3730a3);
+    box-shadow: 0 0 35px rgba(79, 70, 229, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
+
+  .glow-button-white {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
+  }
+
+  .text-glow-white {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  }
+  
+  .curved-arc {
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    border: 1.5px solid rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    clip-path: polygon(0 0, 100% 0, 100% 40%, 0 40%);
+    filter: blur(2px);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+
+  .drifting-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.3;
+    animation: drift 20s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+}
+
+@keyframes drift {
+  from { transform: translate(-10%, -10%) scale(1); }
+  to { transform: translate(10%, 10%) scale(1.1); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-30px) rotate(1deg); }
+}
+
+.animate-float {
+  animation: float 12s ease-in-out infinite;
+}
+
+@keyframes slide-left-right {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-150px); }
+}
+
+@keyframes slide-right-left {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(150px); }
+}
+
+.animate-slide-left-right {
+  animation: slide-left-right 15s ease-in-out infinite;
+}
+
+.animate-slide-right-left {
+  animation: slide-right-left 18s ease-in-out infinite;
 }

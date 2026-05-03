@@ -64,7 +64,7 @@ class CreditRiskModel:
         
         score = (score - score.mean()) / score.std()
         prob = 1 / (1 + np.exp(-(score * 2.0)))
-        df['loan_status'] = (prob > 0.5).astype(int)
+        df['loan_status'] = np.random.binomial(1, prob)
 
         return df[self.feature_names], df['loan_status']
 
@@ -85,7 +85,7 @@ class CreditRiskModel:
         X_train_scaled = self.scaler.fit_transform(X_train)
         X_test_scaled = self.scaler.transform(X_test)
         
-        self.model = LogisticRegression(C=1.0, max_iter=2000)
+        self.model = LogisticRegression(C=0.1, max_iter=2000)
         self.model.fit(X_train_scaled, y_train)
         
         y_prob = self.model.predict_proba(X_test_scaled)[:, 1]

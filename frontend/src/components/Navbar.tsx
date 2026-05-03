@@ -4,8 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import { ShieldCheck, LogOut, X, Sparkles, User, Mail, Lock, KeyRound } from 'lucide-react';
-import Image from 'next/image';
+import { ShieldCheck, LogOut, X, Sparkles, User, Mail, Lock, KeyRound, MessageSquare, ArrowRight, Activity } from 'lucide-react';
 
 import { API_BASE_URL } from '../utils/api';
 
@@ -15,13 +14,8 @@ function NavbarContent() {
   const [isAuth, setIsAuth] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
-  const [authStep, setAuthStep] = useState(1); // 1: Info, 2: OTP
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: ''
-  });
+  const [authStep, setAuthStep] = useState(1);
+  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', password: '' });
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -40,45 +34,31 @@ function NavbarContent() {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
-      const endpoint = authMode === 'signup' ? '/auth/signup' : '/auth/login';
-      const body = authMode === 'signup' 
-        ? { first_name: formData.firstName, last_name: formData.lastName, email: formData.email, password: formData.password }
-        : { email: formData.email };
-
-      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const res = await fetch(`${API_BASE_URL}/auth/request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify({ email: formData.email }),
+        signal: controller.signal
       });
-
-      if (res.ok) {
-        // Send OTP
-        const otpRes = await fetch(`${API_BASE_URL}/auth/send-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: formData.email })
-        });
-        
-        if (otpRes.ok) {
-          setAuthStep(2);
-        } else {
-          setError('Failed to send OTP. Please try again.');
-        }
-      } else {
+      clearTimeout(timeoutId);
+      if (res.ok) setAuthStep(2);
+      else {
         const data = await res.json();
-        setError(data.detail || 'Authentication failed.');
+        setError(data.detail || 'Failed to request code.');
       }
-    } catch (err) {
-      setError('Connection error. Is backend running?');
+    } catch (err: any) {
+      setError(err.name === 'AbortError' ? 'Server timeout.' : 'Connection error.');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
     try {
       const res = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
         method: 'POST',
@@ -92,13 +72,10 @@ function NavbarContent() {
         localStorage.setItem('finquantix_auth', 'true');
         localStorage.setItem('finquantix_token', data.token);
         localStorage.setItem('finquantix_user', JSON.stringify(data.user));
-        resetForm();
         window.location.href = '/dashboard?tab=new';
-      } else {
-        setError('Invalid OTP. Please try again.');
-      }
+      } else setError('Invalid OTP.');
     } catch (err) {
-      setError('Connection error. Is backend running?');
+      setError('Connection error.');
     }
     setIsLoading(false);
   };
@@ -118,208 +95,138 @@ function NavbarContent() {
     window.location.href = '/';
   };
 
-  const NavLink = ({ href, label, activeTab }: { href: string, label: string, activeTab?: string }) => {
+  const NavLink = ({ href, label, activeTab, num }: { href: string, label: string, activeTab?: string, num: string }) => {
     const isActive = pathname === href || (searchParams?.get('tab') === activeTab);
     return (
       <Link 
         href={href} 
-        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${isActive ? 'bg-[#006AFF]/20 text-[#00C8FF] border border-[#006AFF]/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
+        className={`px-5 py-2.5 text-xs font-black transition-all flex items-center gap-2 tracking-widest uppercase ${isActive ? 'text-white text-glow-white' : 'text-slate-400 hover:text-white hover:text-glow-white'}`}
       >
-        {label}
+        <span className="opacity-60 font-bold">{num} /</span>
+        <span>{label}</span>
       </Link>
     );
   };
 
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-[#030820]/80 backdrop-blur-xl border-b border-[#00A9FF]/20 shadow-[0_4px_30px_rgba(0,169,255,0.1)]">
-        <div className="container mx-auto px-6 h-20 flex items-center justify-between max-w-7xl">
-          <Link href="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(0,231,255,0.3)] group-hover:shadow-[0_0_25px_rgba(0,231,255,0.5)] group-hover:scale-105 transition-all">
-              <Image src="/neon-logo.png" alt="FinQuantiX" width={40} height={40} className="w-full h-full object-cover" />
+      <nav className="fixed top-0 left-0 right-0 z-[60] py-6 transition-all border-b border-white/15 bg-background/50 backdrop-blur-md">
+        <div className="container mx-auto px-6 flex items-center justify-between max-w-7xl">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="relative w-10 h-10 flex items-center justify-center">
+              <div className="absolute inset-0 bg-primary/20 rounded-lg blur-md group-hover:bg-primary/30 transition-all"></div>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative z-10 text-white">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </div>
-            <span className="font-extrabold text-2xl tracking-tight text-white drop-shadow-[0_0_15px_rgba(0,231,255,0.4)]">
-              FinQuantiX
-            </span>
+            <div className="flex flex-col">
+              <span className="font-black text-2xl tracking-tighter text-white uppercase">FIN<span className="text-primary">Q</span></span>
+            </div>
           </Link>
           
-          <div className="hidden lg:flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800">
-            <NavLink href="/dashboard?tab=new" activeTab="new" label="Predictor" />
-            <NavLink href="/dashboard?tab=whatif" activeTab="whatif" label="What-If" />
-            <NavLink href="/dashboard?tab=dashboard" activeTab="dashboard" label="Dashboard" />
-            <NavLink href="/live-analysis" label="Live Analysis" />
+          <div className="hidden lg:flex items-center glass-panel px-6 py-2 rounded-full border border-white/5 shadow-2xl">
+            <NavLink href="/dashboard?tab=new" activeTab="new" label="Predictor" num="0.1" />
+            <NavLink href="/dashboard?tab=whatif" activeTab="whatif" label="What-If" num="0.2" />
+            <NavLink href="/dashboard?tab=dashboard" activeTab="dashboard" label="Metrics" num="0.3" />
+            <NavLink href="/live-analysis" label="Live Telemetry" num="0.4" />
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center space-x-6">
+            
             {isAuth ? (
-              <div className="flex items-center space-x-4">
-                <div className="hidden sm:flex items-center space-x-2 text-sm text-[#00F0FF] bg-[#00E7FF]/10 px-3 py-1.5 rounded-lg border border-[#00E7FF]/20">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>Verified Analyst</span>
-                </div>
-                <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors" title="Sign Out">
-                  <LogOut className="w-5 h-5" />
+              <button onClick={handleLogout} className="px-6 py-3 rounded-xl glow-button-blue text-white text-xs font-bold uppercase tracking-widest">
+                Log Out
+              </button>
+            ) : (
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => {setShowModal(true); setAuthMode('login');}} 
+                  className="text-white text-xs font-bold uppercase tracking-widest hover:text-primary transition-colors"
+                >
+                  Login
+                </button>
+                <button 
+                  onClick={() => {setShowModal(true); setAuthMode('signup');}} 
+                  className="px-8 py-3 rounded-xl glow-button-blue text-white text-xs font-bold uppercase tracking-widest flex items-center gap-2"
+                >
+                  Get Started
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
-            ) : (
-              <button 
-                onClick={() => {setShowModal(true); setAuthMode('login');}} 
-                className="group relative px-7 py-3 rounded-2xl bg-gradient-to-r from-[#006AFF] via-[#0088FF] to-[#006AFF] bg-[length:200%_auto] animate-gradient-x hover:scale-105 transition-all duration-500 font-bold text-white shadow-[0_0_20px_rgba(0,85,255,0.4)] hover:shadow-[0_0_35px_rgba(0,85,255,0.6)] flex items-center space-x-2 border border-white/20"
-              >
-                <Sparkles className="w-4 h-4 text-white animate-pulse" />
-                <span className="tracking-tight">Sign In</span>
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              </button>
             )}
           </div>
         </div>
       </nav>
 
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#03091A]/90 backdrop-blur-md animate-fade-in px-4">
-          <div className="bg-[#050D2A] border border-[#00E7FF]/30 p-8 rounded-[2.5rem] shadow-2xl max-w-md w-full relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#00E7FF]/10 blur-[50px] -mr-16 -mt-16"></div>
-            
-            <button onClick={() => {setShowModal(false); resetForm();}} className="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors z-10">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-xl animate-fade-in px-4">
+          <div className="glass-panel border-white/10 p-10 rounded-[3rem] shadow-[0_0_100px_rgba(79,70,229,0.2)] max-w-md w-full relative">
+            <button onClick={() => {setShowModal(false); resetForm();}} className="absolute top-8 right-8 text-slate-500 hover:text-white transition-colors">
               <X className="w-6 h-6" />
             </button>
             
-            <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-[#006AFF]/10 border border-[#006AFF]/20 mb-6 mx-auto relative z-10">
-              <ShieldCheck className="w-8 h-8 text-[#00E7FF]" />
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-8 mx-auto">
+              <ShieldCheck className="w-8 h-8 text-primary" />
             </div>
             
-            <h3 className="text-3xl font-bold text-center text-white mb-2 relative z-10">
-              {authStep === 1 ? (authMode === 'login' ? 'Welcome Back' : 'Create Account') : 'Verify Identity'}
+            <h3 className="text-4xl font-bold text-center text-white mb-2 leading-tight">
+              {authStep === 1 ? (authMode === 'login' ? 'Login' : 'Signup') : 'Verify'}
             </h3>
-            <p className="text-center text-slate-400 mb-8 text-sm relative z-10">
-              {authStep === 1 
-                ? (authMode === 'login' ? 'Sign in to access your risk workspace.' : 'Join FinQuantiX and start predicting.')
-                : `We sent a 6-digit code to ${formData.email}.`}
+            <p className="text-center text-slate-500 mb-10 text-sm font-medium">
+              {authStep === 1 ? 'Enter your details to continue.' : 'Check your inbox for the code.'}
             </p>
 
             {authStep === 1 ? (
-              <form onSubmit={handleInitialSubmit} className="space-y-4 relative z-10">
-                {error && <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-sm text-center animate-shake">{error}</div>}
-                
-                {authMode === 'signup' && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Name</label>
-                      <div className="relative">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                        <input 
-                          type="text" name="firstName" required value={formData.firstName} onChange={handleChange}
-                          className="w-full bg-slate-950/50 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-[#00E7FF] focus:ring-1 focus:ring-[#00E7FF]/30 transition-all"
-                          placeholder="John"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Surname</label>
-                      <div className="relative">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                        <input 
-                          type="text" name="lastName" required value={formData.lastName} onChange={handleChange}
-                          className="w-full bg-slate-950/50 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-[#00E7FF] focus:ring-1 focus:ring-[#00E7FF]/30 transition-all"
-                          placeholder="Doe"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
+              <form onSubmit={handleInitialSubmit} className="space-y-5">
+                {error && <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-xs text-center font-bold">{error}</div>}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Gmail Address</label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input 
-                      type="email" name="email" required value={formData.email} onChange={handleChange}
-                      className="w-full bg-slate-950/50 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-[#00E7FF] focus:ring-1 focus:ring-[#00E7FF]/30 transition-all"
-                      placeholder="analyst@gmail.com"
-                    />
-                  </div>
+                  <input 
+                    type="email" name="email" required value={formData.email} onChange={handleChange}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white outline-none focus:border-primary transition-all text-sm font-medium"
+                    placeholder="Email Address"
+                  />
                 </div>
-
-                {authMode === 'signup' && (
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Password</label>
-                    <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                      <input 
-                        type="password" name="password" required value={formData.password} onChange={handleChange}
-                        className="w-full bg-slate-950/50 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-white outline-none focus:border-[#00E7FF] focus:ring-1 focus:ring-[#00E7FF]/30 transition-all"
-                        placeholder="••••••••"
-                      />
-                    </div>
-                  </div>
-                )}
-
                 <button 
                   type="submit" disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-[#0055FF] to-[#0088FF] hover:from-[#006AFF] hover:to-[#00A9FF] text-white font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(0,85,255,0.3)] hover:shadow-[0_0_30px_rgba(0,231,255,0.4)] hover:-translate-y-0.5 flex justify-center items-center group disabled:opacity-70"
+                  className="w-full glow-button-blue text-white font-bold py-4 rounded-xl transition-all flex justify-center items-center uppercase tracking-widest text-xs"
                 >
-                  {isLoading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : (authMode === 'login' ? 'Send Login OTP' : 'Create Account')}
+                  {isLoading ? '...' : (authMode === 'login' ? 'Send OTP' : 'Continue')}
                 </button>
-
-                <div className="text-center mt-6">
-                  <p className="text-slate-500 text-sm">
-                    {authMode === 'login' ? "Don't have an account?" : "Already have an account?"}
-                    <button 
-                      type="button" 
-                      onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
-                      className="ml-2 text-[#00E7FF] hover:text-white font-bold transition-colors"
-                    >
-                      {authMode === 'login' ? 'Sign Up' : 'Login'}
-                    </button>
-                  </p>
-                </div>
+                <button 
+                  type="button" onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
+                  className="w-full text-center text-slate-500 hover:text-white text-xs font-bold transition-colors mt-4"
+                >
+                  {authMode === 'login' ? "Don't have an account? Sign up" : "Already have an account? Login"}
+                </button>
               </form>
             ) : (
-              <form onSubmit={handleVerifyOtp} className="space-y-6 relative z-10">
-                {error && <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-sm text-center animate-shake">{error}</div>}
-                
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 text-center">Enter 6-digit Code</label>
-                  <div className="relative">
-                    <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#00E7FF]" />
-                    <input 
-                      type="text" required value={otp} onChange={e => setOtp(e.target.value)}
-                      className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl pl-12 pr-4 py-5 text-white outline-none focus:border-[#00E7FF] focus:ring-1 focus:ring-[#00E7FF]/30 transition-all text-center text-3xl tracking-[0.4em] font-mono"
-                      placeholder="000000"
-                      maxLength={6}
-                    />
-                  </div>
-                </div>
-
+              <form onSubmit={handleVerifyOtp} className="space-y-6">
+                <input 
+                  type="text" required value={otp} onChange={e => setOtp(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-5 text-white outline-none focus:border-primary transition-all text-center text-3xl tracking-[0.5em] font-mono"
+                  placeholder="000000"
+                  maxLength={6}
+                />
                 <button 
                   type="submit" disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-[#00E7FF] to-[#0055FF] text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(0,231,255,0.3)] hover:shadow-[0_0_40px_rgba(0,231,255,0.5)] transition-all flex justify-center items-center"
+                  className="w-full glow-button-blue text-white font-bold py-4 rounded-xl uppercase tracking-widest text-xs flex justify-center items-center"
                 >
-                  {isLoading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : 'Verify & Complete'}
-                </button>
-                
-                <button type="button" onClick={() => setAuthStep(1)} className="w-full text-sm text-slate-500 hover:text-white transition-colors text-center">
-                  Entered wrong email? Go back
+                  Verify
                 </button>
               </form>
             )}
           </div>
         </div>
       )}
-
-      <style jsx>{`
-        @keyframes fade-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-        .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
-        .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
-      `}</style>
     </>
   );
 }
 
 export default function Navbar() {
   return (
-    <Suspense fallback={<nav className="h-20 bg-[#030820] border-b-2 border-[#006AFF]/20"></nav>}>
+    <Suspense fallback={<nav className="h-20"></nav>}>
       <NavbarContent />
     </Suspense>
   );

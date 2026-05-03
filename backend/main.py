@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, Header
+from fastapi import FastAPI, HTTPException, Depends, Header, BackgroundTasks
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,9 +23,16 @@ user_store = {} # {email: {first_name, last_name, password, verified}}
 otp_store = {} # {email: otp}
 prediction_history = {} # {email: [predictions]}
 
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://finquantix.vercel.app",
+    "https://finquantixx.vercel.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"], # Keep * for now to ensure it works, but listed others for future
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -176,31 +183,20 @@ def send_email_otp(email: str, otp: str):
         print(f"Resend Error: {e}")
         return False
 
-@app.post("/auth/signup")
-def signup(req: UserSignupRequest):
-    if req.email in user_store:
-        raise HTTPException(status_code=400, detail="User already exists")
-    user_store[req.email] = {"first_name": req.first_name, "last_name": req.last_name, "password": req.password, "verified": False}
-    return {"status": "success"}
-
-@app.post("/auth/login")
-def login(req: UserLoginRequest):
+@app.post("/auth/request")
+def auth_request(req: UserLoginRequest, background_tasks: BackgroundTasks):
+    # This endpoint handles both Login and Signup initiation
+    # If it's a new email, we'll treat it as signup (we can collect names later or assume defaults)
     if req.email not in user_store:
-        raise HTTPException(status_code=404, detail="User not found")
-    return {"status": "success"}
-
-from fastapi import BackgroundTasks
-
-@app.post("/auth/send-otp")
-def send_otp(req: EmailRequest, background_tasks: BackgroundTasks):
+        user_store[req.email] = {"first_name": "User", "last_name": "", "password": "", "verified": False}
+    
     otp = "".join([str(random.randint(0, 9)) for _ in range(6)])
     otp_store[req.email] = otp
     
-    # Send email in background to prevent frontend hang
     background_tasks.add_task(send_email_otp, req.email, otp)
+    print(f"OTP generated for {req.email}: {otp}")
     
-    print(f"OTP generated for {req.email}: {otp}") 
-    return {"status": "success", "message": "OTP processing"}
+    return {"status": "success", "message": "OTP sent"}
 
 @app.post("/auth/verify-otp")
 def verify_otp(req: OTPRequest):
