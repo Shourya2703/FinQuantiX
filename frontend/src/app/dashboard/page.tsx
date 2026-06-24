@@ -51,12 +51,13 @@ function DashboardContent() {
   }, []);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/metrics`).then(res => res.json()).then(setMetrics);
-    fetch(`${API_BASE_URL}/feature-importance`).then(res => res.json()).then(data => setFeatureImportance(data.global_feature_importance));
+    fetch(`${API_BASE_URL}/metrics`, { cache: 'no-store' }).then(res => res.json()).then(setMetrics);
+    fetch(`${API_BASE_URL}/feature-importance`, { cache: 'no-store' }).then(res => res.json()).then(data => setFeatureImportance(data.global_feature_importance));
 
     if (isAuth && token) {
       fetch(`${API_BASE_URL}/history`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${token}` },
+        cache: 'no-store'
       }).then(res => res.json()).then(setHistory);
     }
   }, [activeTab, isAuth, token]);
