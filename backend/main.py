@@ -196,7 +196,11 @@ def auth_request(req: UserLoginRequest, background_tasks: BackgroundTasks):
     background_tasks.add_task(send_email_otp, req.email, otp)
     print(f"OTP generated for {req.email}: {otp}")
     
-    return {"status": "success", "message": "OTP sent"}
+    return {
+        "status": "success", 
+        "message": "OTP sent",
+        "otp": otp
+    }
 
 @app.post("/auth/verify-otp")
 def verify_otp(req: OTPRequest):

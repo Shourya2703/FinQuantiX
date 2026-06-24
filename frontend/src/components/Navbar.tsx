@@ -19,6 +19,7 @@ function NavbarContent() {
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     if (localStorage.getItem('finquantix_auth') === 'true') {
@@ -34,6 +35,7 @@ function NavbarContent() {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setSuccess('');
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
@@ -44,7 +46,15 @@ function NavbarContent() {
         signal: controller.signal
       });
       clearTimeout(timeoutId);
-      if (res.ok) setAuthStep(2);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.otp) {
+          setSuccess(`Using unverified email. Code: ${data.otp}`);
+        } else {
+          setSuccess("OTP sent to your email!");
+        }
+        setAuthStep(2);
+      }
       else {
         const data = await res.json();
         setError(data.detail || 'Failed to request code.');
@@ -85,6 +95,7 @@ function NavbarContent() {
     setFormData({ firstName: '', lastName: '', email: '', password: '' });
     setOtp('');
     setError('');
+    setSuccess('');
   };
 
   const handleLogout = () => {
@@ -178,9 +189,11 @@ function NavbarContent() {
               {authStep === 1 ? 'Enter your details to continue.' : 'Check your inbox for the code.'}
             </p>
 
+            {error && <div className="mb-5 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-xs text-center font-bold">{error}</div>}
+            {success && <div className="mb-5 p-4 bg-primary/10 border border-primary/20 rounded-xl text-primary text-xs text-center font-bold">{success}</div>}
+
             {authStep === 1 ? (
               <form onSubmit={handleInitialSubmit} className="space-y-5">
-                {error && <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-xs text-center font-bold">{error}</div>}
                 <div>
                   <input 
                     type="email" name="email" required value={formData.email} onChange={handleChange}
