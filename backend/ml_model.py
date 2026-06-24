@@ -64,7 +64,9 @@ class CreditRiskModel:
         
         score = (score - score.mean()) / score.std()
         prob = 1 / (1 + np.exp(-(score * 2.0)))
-        df['loan_status'] = np.random.binomial(1, prob)
+        loan_status = (prob > 0.5).astype(int)
+        flip_mask = np.random.random(len(df)) < 0.065
+        df['loan_status'] = np.where(flip_mask, 1 - loan_status, loan_status)
 
         return df[self.feature_names], df['loan_status']
 
